@@ -15,8 +15,8 @@ RUN npm config set registry https://registry.npmmirror.com
 # Copy rush.json from root directory first
 COPY rush.json ./
 
-# Install rush with retry logic
-RUN npm install -g @microsoft/rush --registry=https://registry.npmjs.org
+# 全局 Rush（版本与仓库 rush.json 中 rushVersion 一致）
+RUN npm install -g @microsoft/rush@5.147.1
 
 # Copy the frontend source code (excluding node_modules and build artifacts)
 COPY frontend/ ./frontend/
