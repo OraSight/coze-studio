@@ -19,9 +19,7 @@ import path from 'path';
 import { defineConfig } from '@coze-arch/rsbuild-config';
 import { GLOBAL_ENVS } from '@coze-arch/bot-env';
 
-const API_PROXY_TARGET = `http://localhost:${
-  process.env.WEB_SERVER_PORT || 8888
-}/`;
+const API_PROXY_TARGET = 'http://8.159.128.146:8888/';
 
 const mergedConfig = defineConfig({
   server: {
@@ -36,6 +34,15 @@ const mergedConfig = defineConfig({
       {
         context: ['/v1'],
         target: API_PROXY_TARGET,
+        secure: false,
+        changeOrigin: true,
+      },
+      {
+        context: ['/core-api'],
+        target: 'https://site02.openhydra.net:30002',
+        pathRewrite: {
+          '^/core-api': '/coreApi/users',
+        },
         secure: false,
         changeOrigin: true,
       },

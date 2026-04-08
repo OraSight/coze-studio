@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 
 import { useRequest } from 'ahooks';
@@ -62,12 +62,15 @@ export const useLoginService = ({
 
   const loginStatus = useLoginStatus();
   const navigate = useNavigate();
+  const { search } = useLocation();
 
   useEffect(() => {
     if (loginStatus === 'logined') {
-      navigate('/');
+      const redirect = new URLSearchParams(search).get('redirect');
+      const targetPath = redirect && redirect.startsWith('/') ? redirect : '/';
+      navigate(targetPath);
     }
-  }, [loginStatus]);
+  }, [loginStatus, navigate, search]);
 
   return {
     login: loginService.run,

@@ -1,3 +1,13 @@
+# 本地开发
+
+```shell
+node v22
+cd /Users/judith/workspace/other/openhydra/coze-studio
+node common/scripts/install-run-rush.js update
+cd frontend/apps/coze-studio
+npm run dev
+```
+
 # Coze Studio Frontend
 
 This is the frontend project of Coze Studio, an AI Agent development platform built with monorepo architecture, based on React 18 and modern frontend technology stack.
