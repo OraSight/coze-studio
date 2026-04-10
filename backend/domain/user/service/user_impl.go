@@ -83,20 +83,24 @@ func (u *userImpl) Login(ctx context.Context, email, password string) (user *use
 		return nil, errorx.New(errno.ErrUserInfoInvalidateCode)
 	}
 
-	uniqueSessionID, err := u.IDGen.GenID(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate session id: %w", err)
-	}
+	sessionKey := userModel.SessionKey
+	// Reuse existing valid session so the same account can stay logged in on multiple clients.
+	if _, err := verifySessionKey(sessionKey); err != nil || sessionKey == "" {
+		uniqueSessionID, err := u.IDGen.GenID(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to generate session id: %w", err)
+		}
 
-	sessionKey, err := generateSessionKey(uniqueSessionID)
-	if err != nil {
-		return nil, err
-	}
+		sessionKey, err = generateSessionKey(uniqueSessionID)
+		if err != nil {
+			return nil, err
+		}
 
-	// Update user session key
-	err = u.UserRepo.UpdateSessionKey(ctx, userModel.ID, sessionKey)
-	if err != nil {
-		return nil, err
+		// Persist a new key only when current one is empty/expired/invalid.
+		err = u.UserRepo.UpdateSessionKey(ctx, userModel.ID, sessionKey)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	userModel.SessionKey = sessionKey

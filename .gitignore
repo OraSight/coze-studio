@@ -47,6 +47,7 @@ bin/*
 docker/data/*
 
 backend/static
+backend/resources
 
 node_modules
 common/temp

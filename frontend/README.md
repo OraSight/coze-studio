@@ -4,6 +4,7 @@
 node v22
 cd /Users/judith/workspace/other/openhydra/coze-studio
 node common/scripts/install-run-rush.js update
+# 配置在 rsbuild.config.ts
 cd frontend/apps/coze-studio
 npm run dev
 ```

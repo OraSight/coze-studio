@@ -1,0 +1,20 @@
+services:
+  mysql:
+    ports:
+      - "3306:3306"
+  redis:
+    ports:
+      - "6379:6379"
+  elasticsearch:
+    ports:
+      - "9200:9200"
+  minio:
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+  milvus:
+    ports:
+      - "19530:19530"
+  nsqd:
+    ports:
+      - "4150:4150"
