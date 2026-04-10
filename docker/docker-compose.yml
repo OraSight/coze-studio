@@ -437,7 +437,7 @@ services:
     # build:
     #   context: ..
     #   dockerfile: frontend/Dockerfile
-    image: crpi-m48kvlo3g8s4dcsl.cn-shanghai.personal.cr.aliyuncs.com/ai-education-studio/coze-studio-web:hjaliyun20260408-1
+    image: crpi-m48kvlo3g8s4dcsl.cn-shanghai.personal.cr.aliyuncs.com/ai-education-studio/coze-studio-web:hjaliyun20260410-1
     container_name: coze-web-view
     restart: always
     ports:
