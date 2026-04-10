@@ -20,7 +20,6 @@ import { type ReactNode } from 'react';
 
 import classnames from 'classnames';
 import { isFeishuOrLarkDocumentSource } from '@coze-data/utils';
-import { useKnowledgeStore } from '@coze-data/knowledge-stores';
 import { KnowledgeE2e } from '@coze-data/e2e';
 import { I18n } from '@coze-arch/i18n';
 import {
@@ -90,7 +89,7 @@ export const TextToolbar: React.FC<TextToolbarProps> = ({
   },
   customUIElements: { linkOriginUrlButton, fetchSliceButton },
 }) => {
-  const canEdit = useKnowledgeStore(state => state.canEdit);
+  const canEdit = false;
 
   // Control button display logic
   const showUpdateFreBtn =

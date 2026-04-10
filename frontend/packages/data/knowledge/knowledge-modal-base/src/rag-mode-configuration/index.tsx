@@ -200,6 +200,7 @@ export function RagModeConfiguration({
         >
           <Switch
             checked={use_nl2sql}
+            disabled={isReadonly}
             onChange={value => {
               onDataSetInfoChange(
                 produce(dataSetInfo, draft =>
@@ -217,6 +218,7 @@ export function RagModeConfiguration({
       <SettingItem title={I18n.t('kl_write_024')} tip={<RewriteTips />}>
         <Switch
           checked={use_rewrite}
+          disabled={isReadonly}
           onChange={value => {
             onDataSetInfoChange(
               produce(dataSetInfo, draft =>
@@ -233,6 +235,7 @@ export function RagModeConfiguration({
       <SettingItem title={I18n.t('kl_write_026')} tip={<RerankTips />}>
         <Switch
           checked={use_rerank}
+          disabled={isReadonly}
           onChange={value => {
             onDataSetInfoChange(
               produce(dataSetInfo, draft => {

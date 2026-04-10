@@ -44,7 +44,6 @@ export const BaseContent: React.FC<BaseContentProps> = ({
   onAddChunk,
   onDeleteChunk,
 }) => {
-  const canEdit = useKnowledgeStore(state => state.canEdit);
   const searchValue = useKnowledgeStore(state => state.searchValue);
 
   if (renderData?.length === 0 && !loading) {
@@ -63,8 +62,8 @@ export const BaseContent: React.FC<BaseContentProps> = ({
             isProcessing
               ? I18n.t('content_view_003')
               : searchValue
-              ? I18n.t('knowledge_no_result')
-              : I18n.t('dataset_segment_empty_desc')
+                ? I18n.t('knowledge_no_result')
+                : I18n.t('dataset_segment_empty_desc')
           }
         />
       </div>
@@ -76,7 +75,7 @@ export const BaseContent: React.FC<BaseContentProps> = ({
       <BaseTextKnowledgeEditor
         chunks={renderData}
         documentId={documentId}
-        readonly={!canEdit}
+        readonly={true}
         onChange={onContentChange}
         onAddChunk={onAddChunk}
         onDeleteChunk={onDeleteChunk}

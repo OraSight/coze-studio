@@ -23,13 +23,13 @@ import {
 } from '@coze-data/knowledge-stores';
 import { UnitType } from '@coze-data/knowledge-resource-processor-core';
 import { KnowledgeE2e } from '@coze-data/e2e';
+import { IconCozCross } from '@coze-arch/coze-design/icons';
+import { IconButton, Avatar, Space } from '@coze-arch/coze-design';
 import {
   FormatType,
   type Dataset,
   type DocumentInfo,
 } from '@coze-arch/bot-api/knowledge';
-import { IconCozCross } from '@coze-arch/coze-design/icons';
-import { IconButton, Avatar, Space } from '@coze-arch/coze-design';
 
 import { getFormatTypeFromUnitType } from '@/utils';
 import { RenderDocumentIcon } from '@/components/render-document-icon';
@@ -59,7 +59,7 @@ export const KnowledgeModalNavBar: React.FC<KnowledgeModalNavBarProps> = ({
 }) => {
   const setSearchValue = useKnowledgeStore(state => state.setSearchValue);
   const dataSetDetail = useKnowledgeStore(state => state.dataSetDetail);
-  const canEdit = useKnowledgeStore(state => state.canEdit);
+  const canEdit = false;
 
   const params = useKnowledgeParams();
 
