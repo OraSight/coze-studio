@@ -39,7 +39,7 @@ export const PromptEditorEntry: React.FC<PromptEditorEntryProps> = ({
       setPersonaByImmer: state.setPersonaByImmer,
     })),
   );
-  const isReadonly = useBotDetailIsReadonly();
+  const isReadonly = true; // useBotDetailIsReadonly();
 
   const onChange = (value: string) => {
     setPersonaByImmer(persona => {
