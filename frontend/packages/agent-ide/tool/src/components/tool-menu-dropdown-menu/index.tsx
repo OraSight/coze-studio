@@ -48,7 +48,7 @@ export const ToolMenuDropdownMenu: FC<IProps> = () => {
       })),
     );
 
-  const { isReadonly } = usePreference();
+  const { isReadonly } = { isReadonly: true };
 
   if (!registeredToolKeyConfigList.length) {
     return null;
