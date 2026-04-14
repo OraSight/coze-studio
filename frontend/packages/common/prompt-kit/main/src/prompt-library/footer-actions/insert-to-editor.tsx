@@ -28,7 +28,7 @@ export const InsertToEditor = (props: {
   const { outerEditor, prompt, onInsertPrompt, onCancel } = props;
   return (
     <Button
-      disabled={!prompt}
+      disabled={true}
       onClick={async e => {
         const insertPrompt = await insertToNewline({
           editor: outerEditor,
