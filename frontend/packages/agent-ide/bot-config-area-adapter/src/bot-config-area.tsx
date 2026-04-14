@@ -55,7 +55,6 @@ export const BotConfigArea: FC<BotConfigAreaProps> = ({
 
   const isSingleLLM = mode === BotMode.SingleMode;
   const isSingleWorkflow = mode === BotMode.WorkflowMode;
-
   return (
     <div className="flex items-center justify-end gap-[12px] flex-1 overflow-hidden">
       <CollapsibleIconButtonGroup>

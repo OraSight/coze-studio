@@ -102,10 +102,12 @@ export const SingleMode: React.FC<SingleModeProps> = ({
             [s['wrapper-single-with-tool-area-hidden']]: isAllToolHidden,
           })}
         >
+          {/* 编排 */}
           <AgentConfigArea
             isAllToolHidden={isAllToolHidden}
             {...agentConfigAreaProps}
           />
+          {/* 预览与调试 */}
           <AgentChatArea
             renderChatTitleNode={renderChatTitleNode}
             chatSlot={chatSlot}
