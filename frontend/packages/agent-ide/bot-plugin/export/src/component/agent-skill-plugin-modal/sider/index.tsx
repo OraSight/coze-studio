@@ -66,6 +66,7 @@ export const PluginModalSider: FC<PluginModalSiderProp> = ({
           projectId={query.projectId}
           isCreate={true}
           visible={showFormPluginModel}
+          disabled={true}
           onSuccess={pluginID => {
             onCreateSuccess?.({
               spaceId: id,
@@ -101,6 +102,7 @@ export const PluginModalSider: FC<PluginModalSiderProp> = ({
               data-testid="plugin.modal.create.plugin"
               className={s.addbtn}
               theme="solid"
+              disabled={true}
               onClick={() => {
                 // TODO: Other scenes should also be created in a unified way. If the creation success callback exists, open the plugin modal, otherwise open a new tab.
                 if (

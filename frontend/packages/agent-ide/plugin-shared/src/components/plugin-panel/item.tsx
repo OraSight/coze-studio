@@ -111,9 +111,7 @@ export const PluginItem: React.FC<PluginItemProps> = ({
       {item.tagName}
     </UITag>
   );
-  const isDisabled =
-    marketStatus === ProductStatus?.Unlisted ||
-    auth_mode === PluginAuthMode.NeedInstalled;
+  const isDisabled = true;
   // The end plug-in has not been added, and the applicable channel is prompted.
   const showAddConfirm =
     isLocalPlugin &&
