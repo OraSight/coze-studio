@@ -28,12 +28,13 @@ type ToolItemActionProps = ToolButtonCommonProps & {
 
 export const ToolItemAction: FC<PropsWithChildren<ToolItemActionProps>> = ({
   children,
-  disabled,
+  disabled: disabledProps,
   tooltips,
   onClick,
   hoverStyle = true,
   ...restProps
 }) => {
+  const disabled = true;
   const handleClick: MouseEventHandler<HTMLDivElement> = e => {
     e.preventDefault();
     e.stopPropagation();

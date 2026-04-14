@@ -68,7 +68,7 @@ export type MemoryAddModalProps = ComponentProps<typeof Modal> & {
 };
 
 export const MemoryAddModal: React.FC<MemoryAddModalProps> = props => {
-  const isReadonly = useBotDetailIsReadonly();
+  const isReadonly = true; // useBotDetailIsReadonly();
   const botInfoAuditor = useBotInfoAuditor();
   const { variables: variablesInStore, setBotSkillByImmer } = useBotSkillStore(
     useShallow(state => ({
