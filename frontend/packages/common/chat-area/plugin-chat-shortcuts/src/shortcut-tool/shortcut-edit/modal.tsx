@@ -221,6 +221,7 @@ export const ShortcutEditModal: FC<ShortcutEditModalProps> = props => {
             ref={formRef}
             trigger="blur"
             initValues={editedShortcut}
+            disabled
             autoComplete={'off'}
             autoScrollToError
             className={cls(style['edit-form-wrapper'], {
@@ -291,6 +292,7 @@ export const ShortcutEditModal: FC<ShortcutEditModalProps> = props => {
                 )}
                 field="description"
                 noLabel
+                disabled={true}
               />
             </div>
             <ActionSwitchArea
@@ -300,6 +302,7 @@ export const ShortcutEditModal: FC<ShortcutEditModalProps> = props => {
               formRef={formRef}
               modalRef={modalRef}
               isBanned={isBanned}
+              disabled
             />
             {botMode === BotMode.MultiMode && (
               <SwitchAgent
@@ -337,7 +340,7 @@ export const ShortcutEditModal: FC<ShortcutEditModalProps> = props => {
           <Button
             onClick={onConfirm}
             loading={confirmLoading}
-            disabled={disableSubmit}
+            disabled={true}
           >
             {I18n.t('Confirm')}
           </Button>

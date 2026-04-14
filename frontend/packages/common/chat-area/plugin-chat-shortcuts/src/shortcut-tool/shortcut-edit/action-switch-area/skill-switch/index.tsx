@@ -34,13 +34,14 @@ export interface ChooseSendTypeRadioProps {
   editedShortcut?: ShortcutEditFormValues;
   skillModal: FC<SkillsModalProps>;
   isBanned: boolean;
+  disabled?: boolean;
   onToolChange?: (tooInfo: ToolInfo | null) => void;
 }
 
 const { Checkbox } = Form;
 
 export const SkillSwitch: FC<ChooseSendTypeRadioProps> = props => {
-  const { editedShortcut, skillModal, isBanned, onToolChange } = props;
+  const { editedShortcut, skillModal, isBanned, onToolChange, disabled } = props;
   const { action, open, cancel } = useToolAction({
     initTool: getToolInfoByShortcut(editedShortcut),
     onSelect: onToolChange,
@@ -66,11 +67,12 @@ export const SkillSwitch: FC<ChooseSendTypeRadioProps> = props => {
           }}
           noLabel
           fieldClassName="!pb-0"
+          disabled={Boolean(disabled)}
         >
           {I18n.t('shortcut_modal_shortcut_action_use_plugin_wf')}
         </Checkbox>
         <div className="flex items-center">
-          {editedShortcut?.use_tool ? action : null}
+          {editedShortcut?.use_tool && !disabled ? action : null}
         </div>
       </div>
     </div>

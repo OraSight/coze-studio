@@ -50,7 +50,7 @@ export const SuggestionBlock: FC<ISuggestionBlockProps> = ({ title }) => {
       setSuggestionConfig: $store.setSuggestionConfig,
     })),
   );
-  const isReadonly = useBotDetailIsReadonly();
+  const isReadonly = true; // useBotDetailIsReadonly();
 
   const isOpen =
     suggestionConfig.suggest_reply_mode ===
