@@ -38,7 +38,7 @@ export const BotEditorInitLayoutAdapter: React.FC<
 > = ({ children, headerExtra, pageName, ...layoutProps }) => {
   useInitAgent();
 
-  const isPreview = true;
+  const isPreview = usePageRuntimeStore(state => state.isPreview);
   const isEditLocked = isPreview;
 
   return (

@@ -169,11 +169,10 @@ export const usePageRuntimeStore = create<PageRuntime & PageRuntimeAction>()(
       getIsPreview: version => typeof version !== 'undefined',
       initStore: info => {
         const { getIsPreview } = get();
-        const forceReadonly = true;
         set({
           init: true,
           isPreview: getIsPreview(info?.customVersion),
-          editable: forceReadonly ? false : info?.editable,
+          editable: info?.editable,
           savingInfo: { saving: false, time: dayjs().format('HH:mm:ss') },
           hasUnpublishChange: Boolean(info.has_unpublished_change),
         });

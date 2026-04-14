@@ -26,6 +26,7 @@ import { usePageRuntimeStore } from '@coze-studio/bot-detail-store/page-runtime'
 import { useDiffTaskStore } from '@coze-studio/bot-detail-store/diff-task';
 import { useBotInfoStore } from '@coze-studio/bot-detail-store/bot-info';
 import { useBotDetailIsReadonly } from '@coze-studio/bot-detail-store';
+import { BackButton } from '@coze-foundation/layout';
 import { type SenderInfo, useBotInfo } from '@coze-common/chat-area';
 import { I18n } from '@coze-arch/i18n';
 import { renderHtmlTitle } from '@coze-arch/bot-utils';
@@ -122,6 +123,7 @@ export const BotHeader: React.FC<BotHeaderProps> = props => {
         </Helmet>
         {/** 1. Left bot information area */}
         <div className="flex items-center">
+          <BackButton onClickBack={goBackToBotList} />
           <BotInfoCard
             isReadonly={isReadonly}
             editBotInfoFn={editBotInfoFn}
