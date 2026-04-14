@@ -35,8 +35,8 @@ export type HeaderAddonAfterProps = Omit<
 export const HeaderAddonAfter: React.FC<HeaderAddonAfterProps> = ({
   isEditLocked,
 }) => {
-  const isReadonly = useBotDetailIsReadonly();
-  const editable = usePageRuntimeStore(state => state.editable);
+  const isReadonly = true; // useBotDetailIsReadonly();
+  const editable = false; // usePageRuntimeStore(state => state.editable);
   const { botId, botInfo } = useBotInfoStore(
     useShallow(state => ({
       botId: state.botId,
@@ -54,25 +54,6 @@ export const HeaderAddonAfter: React.FC<HeaderAddonAfterProps> = ({
       {editable ? (
         <Divider layout="vertical" style={{ height: '20px' }} />
       ) : null}
-      {/** 3.2 Button area */}
-      <div className="flex items-center gap-2">
-        {!isEditLocked ? (
-          <>
-            <div className="flex items-center gap-2">
-              {/** Function button area */}
-              <MoreMenuButton />
-            </div>
-            {/** Submit post related button */}
-            <div className="flex items-center gap-2">
-              {editable ? <DeployButton /> : null}
-              {!editable && botInfo && botId ? (
-                <DuplicateBot botID={botId} />
-              ) : null}
-              <div id="diff-task-button-container"></div>
-            </div>
-          </>
-        ) : null}
-      </div>
     </div>
   );
 };

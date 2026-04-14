@@ -52,7 +52,7 @@ export interface BotHeaderProps {
 export const BotHeader: React.FC<BotHeaderProps> = props => {
   const navigate = useNavigate();
   const spaceID = useSpaceStore(state => state.space.id);
-  const isReadonly = useBotDetailIsReadonly();
+  const isReadonly = true; // useBotDetailIsReadonly();
   const { pageFrom } = usePageRuntimeStore(
     useShallow(state => ({
       pageFrom: state.pageFrom,
@@ -98,10 +98,6 @@ export const BotHeader: React.FC<BotHeaderProps> = props => {
   });
 
   const diffTask = useDiffTaskStore(state => state.diffTask);
-
-  const goBackToBotList = () => {
-    navigate(`/space/${spaceID}/develop`);
-  };
 
   return (
     <>

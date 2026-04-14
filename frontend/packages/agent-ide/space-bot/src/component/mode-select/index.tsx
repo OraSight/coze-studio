@@ -52,7 +52,7 @@ export const ModeSelect: React.FC<ModeSelectProps> = ({
     })),
   );
 
-  const isReadonly = useBotDetailIsReadonly() || readonly;
+  const isReadonly = true; // useBotDetailIsReadonly() || readonly;
 
   const handleModeChange = async (value: BotMode) => {
     try {
