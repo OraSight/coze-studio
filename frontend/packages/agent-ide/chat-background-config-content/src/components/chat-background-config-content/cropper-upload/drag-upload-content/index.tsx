@@ -67,64 +67,19 @@ interface DragUploadContentProps {
 }
 
 export const DragUploadContent: React.FC<DragUploadContentProps> = ({
-  manualUpload,
-  renderEnhancedUpload,
   mode = 'init',
 }) => {
-  const [dragIn, setDragIn] = useState(false);
-  const customUpload = (
-    <DragContent
-      icon={<IconUpload className={s.icon} />}
-      title={I18n.t('upload_image_guide')}
-      tip={
-        <Popover
-          position="top"
-          content={
-            <div className="p-4 w-[240px]">
-              <div className="coz-fg-plus font-semi">
-                {I18n.t('bgi_upload_image_format_requirement_title')}
-              </div>
-              <div className="coz-fg-secondary text-xs">
-                {I18n.t('bgi_upload_image_format_requirement')}
-              </div>
-              <img src={IMG_SIZE_TIP} className="w-full mt-3" />
-            </div>
-          }
-        >
-          <Button
-            icon={<IconInfo />}
-            color="primary"
-            size={'mini'}
-            className={'!bg-transparent'}
-          />
-        </Popover>
-      }
-      desc={I18n.t('upload_image_format_requirement')}
-      btnText={I18n.t('upload_image')}
-      btnOnClick={manualUpload}
-    />
+  const unsupportedText = (
+    <div className="coz-fg-secondary text-sm py-6">当前用户不支持上传图片</div>
   );
+
   return mode === 'init' ? (
-    <div
-      className={`w-full flex items-center flex-col	p-16  border border-dashed  rounded-[6px] h-[466px] mb-6 ${
-        dragIn
-          ? 'coz-stroke-hglt coz-bg-primary'
-          : 'coz-stroke-primary coz-bg-max'
-      }`}
-      onClick={e => e.stopPropagation()}
-      onDragEnter={() => {
-        setDragIn(true);
-      }}
-      onDragLeave={() => {
-        setDragIn(false);
-      }}
-    >
-      {customUpload}
-      {renderEnhancedUpload?.()}
+    <div className="w-full flex items-center justify-center border border-dashed rounded-[6px] h-[466px] mb-6 coz-stroke-primary coz-bg-max">
+      {unsupportedText}
     </div>
   ) : (
     <div className="opacity-80	coz-bg-max w-full h-full flex items-center flex-col justify-center">
-      {customUpload}
+      {unsupportedText}
     </div>
   );
 };

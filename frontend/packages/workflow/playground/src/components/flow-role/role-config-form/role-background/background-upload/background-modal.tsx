@@ -151,11 +151,12 @@ export const BackgroundModal: React.FC<BackgroundModalProps> = ({
             showClose: false,
           });
         }}
+        disabled={true}
       >
         {isEmpty ? (
           <DragUploadContent
             onUpload={() => {
-              uploaderRef?.current?.openFileDialog();
+              // uploaderRef?.current?.openFileDialog();
             }}
           />
         ) : (
