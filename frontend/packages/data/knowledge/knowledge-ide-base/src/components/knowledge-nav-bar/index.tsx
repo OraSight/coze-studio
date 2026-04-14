@@ -250,7 +250,6 @@ export const KnowledgeIDENavBar = ({
           {isImageFormat ? <PhotoFilter /> : null}
           {isShowResegmentBtn ? textConfigButton : null}
           {showTableConfigButton ? tableConfigButton : null}
-          {canEdit ? importKnowledgeSourceButton : null}
         </Space>
       </div>
       {editKnowledgeModal}

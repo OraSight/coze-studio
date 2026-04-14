@@ -126,66 +126,6 @@ export const TextToolbar: React.FC<TextToolbarProps> = ({
         />
         <DocTag documentInfo={curDoc} />
       </div>
-
-      <Space spacing={8}>
-        {fileUrl ? (
-          <div className="flex items-center gap-2">
-            <span className="coz-fg-secondary text-[12px] leading-[16px]">
-              {I18n.t('knowledge_level_030')}
-            </span>
-            <Switch
-              size="mini"
-              checked={showOriginalFile}
-              onChange={onToggleOriginalFile}
-            ></Switch>
-          </div>
-        ) : null}
-
-        {showResegmentButton && canEdit ? (
-          <Tooltip theme="dark" content={I18n.t('knowledge_new_001')}>
-            <IconButton
-              data-testid={KnowledgeE2e.SegmentDetailUpdateBtn}
-              iconPosition="left"
-              color="secondary"
-              size="small"
-              icon={<IconCozAdjust />}
-              onClick={onResegment}
-            />
-          </Tooltip>
-        ) : null}
-
-        {showUpdateFreBtn ? (
-          <Tooltip
-            theme="dark"
-            content={I18n.t('datasets_unit_upload_field_update_frequency')}
-          >
-            <IconButton
-              data-dtestid={`${KnowledgeE2e.SegmentDetailContentItemFrequencyIcon}.${curDoc?.document_id}`}
-              icon={<IconCozHistory className="text-[14px]" />}
-              iconPosition="left"
-              color="secondary"
-              size="small"
-              onClick={onUpdateFrequency}
-            ></IconButton>
-          </Tooltip>
-        ) : null}
-
-        {showFetchSliceBtn ? fetchSliceButton : null}
-        {linkOriginUrlButton}
-
-        {showDeleteDocBtn ? (
-          <Tooltip theme="dark" content={I18n.t('kl2_006')}>
-            <IconButton
-              data-testid={KnowledgeE2e.SegmentDetailContentDeleteIcon}
-              icon={<IconCozTrashCan className="text-[14px]" />}
-              color="secondary"
-              iconPosition="left"
-              size="small"
-              onClick={onDelete}
-            ></IconButton>
-          </Tooltip>
-        ) : null}
-      </Space>
     </div>
   );
 };

@@ -51,9 +51,9 @@ export const DocSelector = ({
   options,
   value,
   onChange,
-  canEdit,
   onRename,
 }: DocSelectorProps<typeof value>) => {
+  const canEdit = false;
   const [search, setSearch] = useState('');
   const [searchValue, setSearchValue] = useState('');
   const [docName, setDocName] = useState('');
@@ -139,6 +139,7 @@ export const DocSelector = ({
               validateStatus={!docName ? 'error' : 'default'}
               placeholder={I18n.t('knowledge_upload_text_custom_doc_name_tips')}
               onChange={v => setDocName(v)}
+              disabled={true}
             />
             {!docName && (
               <div className={styles['edit-doc-name-container-input-error']}>
@@ -148,7 +149,7 @@ export const DocSelector = ({
           </div>
           <div className="text-right">
             <Button
-              disabled={!docName}
+              disabled={true}
               onClick={handleSaveDocName}
               size="small"
               loading={loading}
