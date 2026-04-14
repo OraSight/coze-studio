@@ -72,7 +72,7 @@ export const KnowledgeIDENavBar = ({
   onBack,
 }: KnowledgeIDENavBarProps) => {
   const dataSetDetail = useKnowledgeStore(state => state.dataSetDetail);
-  const canEdit = useKnowledgeStore(state => state.canEdit);
+  const canEdit = false; // useKnowledgeStore(state => state.canEdit);
   const documentList = useKnowledgeStore(state => state.documentList);
   const navigate = useNavigate();
   const params = useKnowledgeParams();
