@@ -45,6 +45,17 @@ export const BizAgentIdeKnowledgeIDENavBar = (
       onBack={onBack}
       datasetDetail={dataSetDetail}
       docInfo={documentList?.[0]}
+      actionButtons={
+        <NavBarActionButton
+          key={dataSetDetail?.dataset_id}
+          dataSetDetail={dataSetDetail}
+        />
+      }
+      importKnowledgeSourceButton={
+        importKnowledgeSourceButton ?? (
+          <BizAgentIdeImportKnowledgeSourceButton />
+        )
+      }
       beforeBack={handleBotIdeBack}
     />
   );
