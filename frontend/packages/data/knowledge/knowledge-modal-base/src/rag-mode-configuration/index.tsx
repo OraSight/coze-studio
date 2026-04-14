@@ -55,11 +55,11 @@ export function RagModeConfiguration({
   dataSetInfo,
   onDataSetInfoChange,
   showTitle = true,
-  isReadonly = false,
   showNL2SQLConfig,
   showAuto = true,
   showSourceDisplay = true,
 }: RagModeConfigurationProps): JSX.Element {
+  const isReadonly = true;
   const {
     auto,
     min_score: minScore,
@@ -216,6 +216,7 @@ export function RagModeConfiguration({
       ) : null}
       <SettingItem title={I18n.t('kl_write_024')} tip={<RewriteTips />}>
         <Switch
+          disabled={isReadonly}
           checked={use_rewrite}
           onChange={value => {
             onDataSetInfoChange(
@@ -232,6 +233,7 @@ export function RagModeConfiguration({
       </SettingItem>
       <SettingItem title={I18n.t('kl_write_026')} tip={<RerankTips />}>
         <Switch
+          disabled={isReadonly}
           checked={use_rerank}
           onChange={value => {
             onDataSetInfoChange(
