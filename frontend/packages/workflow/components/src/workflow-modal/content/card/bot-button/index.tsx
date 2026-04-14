@@ -86,7 +86,7 @@ export const WorkflowBotButton: FC<WorkflowBotButtonProps> = ({
             }
           >
             <LoadingButton
-              disabled
+              disabled={true}
               color="primary"
               className={styles.button}
               data-testid="workflow.modal.add"
@@ -133,7 +133,7 @@ export const WorkflowBotButton: FC<WorkflowBotButtonProps> = ({
           content={<span className={styles.content}>{I18n.t(key)}</span>}
         >
           <LoadingButton
-            disabled
+            disabled={true}
             color="primary"
             className={styles.button}
             data-testid="workflow.modal.add"
@@ -147,6 +147,7 @@ export const WorkflowBotButton: FC<WorkflowBotButtonProps> = ({
     if (!isAdded) {
       return (
         <LoadingButton
+          disabled={true}
           onClick={async () => {
             const isSuccess = await onAdd?.();
             if (isSuccess) {

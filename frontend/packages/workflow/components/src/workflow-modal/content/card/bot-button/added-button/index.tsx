@@ -50,6 +50,7 @@ export const WorkflowAddedButton: FC<
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       data-testid="workflow.modal.button.added"
+      disabled={true}
     >
       {isMouseIn
         ? i18nText(ModalI18nKey.ListItemRemove)

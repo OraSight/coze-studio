@@ -82,16 +82,9 @@ export const CreateWorkflowBtn: FC<
     <>
       {showSingleButton ? (
         <Button
+          disabled={true}
           className={className}
           color="hgltplus"
-          onClick={() => {
-            if (from === WorkflowModalFrom.WorkflowAgent) {
-              setCreateFlowMode(WorkflowMode.ChatFlow);
-            } else {
-              setCreateFlowMode(WorkflowMode.Workflow);
-            }
-            setCreateModalVisible(true);
-          }}
         >
           {from === WorkflowModalFrom.WorkflowAgent
             ? I18n.t('wf_chatflow_81')
@@ -106,10 +99,7 @@ export const CreateWorkflowBtn: FC<
               {menuConfig.map(item => (
                 <Menu.Item
                   key={item.label}
-                  onClick={(value, event) => {
-                    event.stopPropagation();
-                    item.handler();
-                  }}
+                  disabled={true}
                   icon={item.icon}
                 >
                   {item.label}
@@ -119,6 +109,7 @@ export const CreateWorkflowBtn: FC<
           }
         >
           <Button
+            disabled={true}
             className={className}
             color="hgltplus"
             icon={<IconCozArrowDown />}
