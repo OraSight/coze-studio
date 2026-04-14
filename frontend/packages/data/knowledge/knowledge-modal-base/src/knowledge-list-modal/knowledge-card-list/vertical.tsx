@@ -73,6 +73,7 @@ function AddedButton(buttonProps: ButtonProps) {
         [buttonProps.className || '']: Boolean(buttonProps.className),
         [styles.addedMouseIn]: isMouseIn,
       })}
+      disabled={true}
     >
       {isMouseIn ? I18n.t('Remove') : I18n.t('Added')}
     </UIButton>
@@ -253,7 +254,7 @@ export const KnowledgeCardListVertical: FC<DatasetCardListVerticalProps> = ({
               </AddedButton>
             ) : (
               <UIButton
-                disabled={item.status === DatasetStatus.DatasetForbid}
+                disabled={true}
                 className={styles.button}
                 onClick={() => onAdd(item)}
                 data-testid="bot.database.add.modal.add.button"

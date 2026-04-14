@@ -372,6 +372,7 @@ const useKnowledgeFilter = ({
           theme="solid"
           onClick={handleAdd}
           data-testid={BotE2e.BotKnowledgeSelectListModalCreateBtn}
+          disabled={true}
         >
           {I18n.t('datasets_create_btn')}
         </UIButton>
@@ -611,6 +612,7 @@ const useKnowledgeFilter = ({
               {scene === Scene.MODAL && canCreate ? (
                 <UIButton
                   theme="solid"
+                  disabled={true}
                   onClick={handleAdd}
                   data-testid={BotE2e.BotKnowledgeSelectListModalCreateBtn}
                 >
