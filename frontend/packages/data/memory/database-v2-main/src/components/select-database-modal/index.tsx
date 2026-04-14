@@ -532,6 +532,7 @@ export const useSelectDatabaseModal = ({
                 }}
               >
                 <Button
+                  disabled={true}
                   color="brand"
                   iconPosition="right"
                   icon={<IconCozArrowDown />}

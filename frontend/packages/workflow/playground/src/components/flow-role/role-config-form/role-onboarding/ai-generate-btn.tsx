@@ -47,6 +47,7 @@ const formatContent = (str: string) => {
 
 export const AIGenerateBtn: React.FC = observer(() => {
   const form = useForm();
+  const disabled = true;
   const [generating, setGenerating] = useState(false);
 
   const { spaceId, workflowId } = useGlobalState();
@@ -82,7 +83,7 @@ export const AIGenerateBtn: React.FC = observer(() => {
       color="aihglt"
       onlyIcon
       loading={generating}
-      disabled={form.disabled}
+      disabled={disabled}
       onClick={generate}
     />
   );

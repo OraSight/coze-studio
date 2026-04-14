@@ -90,9 +90,10 @@ interface SuggestionListProps {
 
 export const SuggestionList: React.FC<SuggestionListProps> = ({
   value,
-  disabled,
+  disabled: disabledProps,
   onChange,
 }) => {
+  const disabled = true;
   const innerValue = useMemo(() => {
     if (disabled) {
       return value || [];

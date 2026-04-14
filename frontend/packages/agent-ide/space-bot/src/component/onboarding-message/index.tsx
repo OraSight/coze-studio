@@ -88,7 +88,7 @@ export const OnboardingMessage = forwardRef<
 
   const setToolValidData = useToolValidData();
 
-  const isReadonly = useBotDetailIsReadonly();
+  const isReadonly = true; // useBotDetailIsReadonly();
   const defaultExpand = useDefaultExPandCheck({
     blockKey: SkillKeyEnum.ONBORDING_MESSAGE_BLOCK,
     configured:
