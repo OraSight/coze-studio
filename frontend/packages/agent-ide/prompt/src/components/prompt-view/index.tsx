@@ -38,7 +38,7 @@ export const PromptView: React.FC<
 > = props => {
   const { actionButton, className, children, editorExtensions } = props;
 
-  const isReadonly = useBotDetailIsReadonly();
+  const isReadonly = true; // useBotDetailIsReadonly();
   const mode = useBotInfoStore(innerS => innerS.mode);
 
   const isSingle = mode === BotMode.SingleMode;
