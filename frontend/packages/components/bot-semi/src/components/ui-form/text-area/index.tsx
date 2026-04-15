@@ -31,6 +31,7 @@ export const UIFormTextArea: typeof TextAreaInner = forwardRef(
       ref={ref}
       {...props}
       fieldClassName={cs(fieldClassName, s.field)}
+      disabled={true}
     />
   ),
 );

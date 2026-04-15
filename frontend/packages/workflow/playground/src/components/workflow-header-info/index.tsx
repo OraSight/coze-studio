@@ -37,12 +37,11 @@ export const WorkflowInfo = () => {
   const {
     info,
     config,
-    readonly,
     isCollaboratorMode,
     hasChanged,
     isViewHistory,
   } = globalState;
-
+  const readonly = true;
   const { autoSaveTime, savingError, preview } = config;
 
   // Has the current process been published?

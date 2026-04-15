@@ -13,15 +13,15 @@ npm run dev
 
 ```shell
 # 在仓库根目录执行（上下文需包含 rush.json、frontend、common、scripts）
-cd /path/to/coze-studio
+cd /Users/judith/workspace/other/openhydra/coze-studio
 # --platform 按需修改，常见：linux/amd64（多数服务器）、linux/arm64（Apple Silicon 本机跑容器）
 DOCKER_BUILDKIT=1 docker build --platform linux/amd64 -f frontend/Dockerfile -t coze-studio-frontend:latest .
-docker tag coze-studio-frontend:latest crpi-m48kvlo3g8s4dcsl.cn-shanghai.personal.cr.aliyuncs.com/ai-education-studio/coze-studio-web:hjaliyun20260410-1
-docker push crpi-m48kvlo3g8s4dcsl.cn-shanghai.personal.cr.aliyuncs.com/ai-education-studio/coze-studio-web:hjaliyun20260410-1
+docker tag coze-studio-frontend:latest crpi-m48kvlo3g8s4dcsl.cn-shanghai.personal.cr.aliyuncs.com/ai-education-studio/coze-studio-web:hjaliyun20260414-1
+docker push crpi-m48kvlo3g8s4dcsl.cn-shanghai.personal.cr.aliyuncs.com/ai-education-studio/coze-studio-web:hjaliyun20260414-1
 # ssh到阿里云服务器
 ssh root@8.159.128.146
 # 服务器拉取镜像
-docker pull crpi-m48kvlo3g8s4dcsl.cn-shanghai.personal.cr.aliyuncs.com/ai-education-studio/coze-studio-web:hjaliyun20260410-1
+docker pull crpi-m48kvlo3g8s4dcsl.cn-shanghai.personal.cr.aliyuncs.com/ai-education-studio/coze-studio-web:hjaliyun20260414-1
 # 服务器替换镜像
 cd /root/coze-studio
 vim docker/docker-compose.yml

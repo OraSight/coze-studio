@@ -16,8 +16,7 @@
 
 import React from 'react';
 
-import { IconCozArrowLeft } from '@coze-arch/coze-design/icons';
-import { IconButton, CozAvatar } from '@coze-arch/coze-design';
+import { CozAvatar } from '@coze-arch/coze-design';
 
 import { WorkflowInfo } from '../workflow-header-info';
 import { useGlobalState } from '../../hooks';
@@ -36,7 +35,8 @@ import styles from './index.module.less';
 
 const WorkFlowHeader: React.FC = () => {
   const globalState = useGlobalState();
-  const { readonly, info, playgroundProps, workflowId } = globalState;
+  const { info, workflowId } = globalState;
+  const readonly = true;
 
   return (
     <div className={styles.container}>
@@ -44,15 +44,6 @@ const WorkFlowHeader: React.FC = () => {
         className={styles.left}
         data-testid={getWorkflowHeaderTestId('info')}
       >
-        <IconButton
-          icon={<IconCozArrowLeft />}
-          color="secondary"
-          data-testid={getWorkflowHeaderTestId('back')}
-          onClick={() => {
-            playgroundProps.onBackClick?.(globalState);
-          }}
-        />
-
         <CozAvatar src={info.url || ''} type="platform" alt="Avatar" />
 
         <WorkflowInfo />
