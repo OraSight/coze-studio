@@ -50,6 +50,7 @@ type ValidateProfileUpdateResponse struct {
 }
 
 type CreateUserRequest struct {
+	UserID      int64
 	Email       string
 	Password    string
 	Name        string
@@ -67,6 +68,8 @@ type User interface {
 	SaasUserProvider
 	// Create creates or registers a new user.
 	Create(ctx context.Context, req *CreateUserRequest) (user *entity.User, err error)
+	CreateSpace(ctx context.Context, space *entity.Space) (err error)
+	AddSpaceUser(ctx context.Context, spaceID, userID int64, roleType int32) (err error)
 	Login(ctx context.Context, email, password string) (user *entity.User, err error)
 	Logout(ctx context.Context, userID int64) (err error)
 	ResetPassword(ctx context.Context, email, password string) (err error)

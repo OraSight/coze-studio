@@ -267,6 +267,9 @@ func (p *pluginServiceImpl) changePluginAndToolsInfoForCopy(req *dto.CopyPluginR
 		)
 
 		plugin.APPID = nil
+		if req.TargetSpaceID != nil {
+			plugin.SpaceID = *req.TargetSpaceID
+		}
 		plugin.Version = ptr.Of(defaultVersion)
 		plugin.VersionDesc = ptr.Of(defaultVersionDesc)
 
@@ -284,6 +287,9 @@ func (p *pluginServiceImpl) changePluginAndToolsInfoForCopy(req *dto.CopyPluginR
 	}
 
 	if req.CopyScene == consts.CopySceneOfAPPDuplicate {
+		if req.TargetSpaceID != nil {
+			plugin.SpaceID = *req.TargetSpaceID
+		}
 		plugin.APPID = req.TargetAPPID
 	}
 }

@@ -46,6 +46,7 @@ type UserRepository interface {
 	CreateUser(ctx context.Context, user *model.User) error
 	GetUserBySessionKey(ctx context.Context, sessionKey string) (*model.User, bool, error)
 	GetUsersByIDs(ctx context.Context, userIDs []int64) ([]*model.User, error)
+	DeleteCloneTarget(ctx context.Context, userID int64) error
 }
 
 type SpaceRepository interface {

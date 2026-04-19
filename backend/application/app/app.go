@@ -838,10 +838,11 @@ func copyPlugin(ctx context.Context, metaInfo *copyMetaInfo, res *entity.Resourc
 	}
 
 	resp, err = plugin.PluginApplicationSVC.CopyPlugin(ctx, &dto.CopyPluginRequest{
-		CopyScene:   copyScene,
-		PluginID:    res.ResID,
-		UserID:      metaInfo.userID,
-		TargetAPPID: metaInfo.toAppID,
+		CopyScene:     copyScene,
+		PluginID:      res.ResID,
+		UserID:        metaInfo.userID,
+		TargetSpaceID: ptr.Of(metaInfo.appSpaceID),
+		TargetAPPID:   metaInfo.toAppID,
 	})
 	if err != nil {
 		return nil, errorx.Wrapf(err, "CopyPlugin failed, pluginID=%d, scene=%s", res.ResID, metaInfo.scene)
@@ -886,12 +887,13 @@ func copyDatabase(ctx context.Context, metaInfo *copyMetaInfo, res *entity.Resou
 	}
 
 	resp, err := memory.DatabaseApplicationSVC.CopyDatabase(ctx, &memory.CopyDatabaseRequest{
-		DatabaseIDs: []int64{res.ResID},
-		TableType:   table.TableType_OnlineTable,
-		CreatorID:   metaInfo.userID,
-		IsCopyData:  true,
-		TargetAppID: ptr.FromOrDefault(metaInfo.toAppID, 0),
-		Suffix:      suffix,
+		DatabaseIDs:   []int64{res.ResID},
+		TableType:     table.TableType_OnlineTable,
+		CreatorID:     metaInfo.userID,
+		IsCopyData:    true,
+		TargetSpaceID: ptr.Of(metaInfo.appSpaceID),
+		TargetAppID:   ptr.FromOrDefault(metaInfo.toAppID, 0),
+		Suffix:        suffix,
 	})
 	if err != nil {
 		return 0, errorx.Wrapf(err, "CopyDatabase failed, databaseID=%d, scene=%s", res.ResID, metaInfo.scene)

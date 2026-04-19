@@ -29,7 +29,9 @@ import (
 	"github.com/coze-dev/coze-studio/backend/application/base/ctxutil"
 	"github.com/coze-dev/coze-studio/backend/bizpkg/config"
 	"github.com/coze-dev/coze-studio/backend/domain/user/entity"
+	"github.com/coze-dev/coze-studio/backend/domain/user/repository"
 	user "github.com/coze-dev/coze-studio/backend/domain/user/service"
+	"github.com/coze-dev/coze-studio/backend/infra/idgen"
 	"github.com/coze-dev/coze-studio/backend/infra/storage"
 	"github.com/coze-dev/coze-studio/backend/pkg/errorx"
 	"github.com/coze-dev/coze-studio/backend/pkg/lang/ptr"
@@ -41,6 +43,9 @@ var UserApplicationSVC = &UserApplicationService{}
 
 type UserApplicationService struct {
 	oss       storage.Storage
+	idgen     idgen.IDGenerator
+	userRepo  repository.UserRepository
+	spaceRepo repository.SpaceRepository
 	DomainSVC user.User
 }
 
@@ -49,6 +54,10 @@ func isValidEmail(email string) bool {
 	// If the email string is not in the correct format, it will return an error.
 	_, err := mail.ParseAddress(email)
 	return err == nil
+}
+
+func (u *UserApplicationService) GenerateCloneTargetUserID(ctx context.Context) (int64, error) {
+	return u.idgen.GenID(ctx)
 }
 
 func (u *UserApplicationService) PassportWebEmailRegisterV2(ctx context.Context, locale string, req *passport.PassportWebEmailRegisterV2PostRequest) (

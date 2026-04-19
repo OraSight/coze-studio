@@ -284,9 +284,12 @@ func (u *userImpl) Create(ctx context.Context, req *CreateUserRequest) (user *us
 		name = strings.Split(req.Email, "@")[0]
 	}
 
-	userID, err := u.IDGen.GenID(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("generate id error: %w", err)
+	userID := req.UserID
+	if userID <= 0 {
+		userID, err = u.IDGen.GenID(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("generate id error: %w", err)
+		}
 	}
 
 	now := time.Now().UnixMilli()
@@ -352,6 +355,29 @@ func (u *userImpl) Create(ctx context.Context, req *CreateUserRequest) (user *us
 	}
 
 	return userPo2Do(newUser, iconURL), nil
+}
+
+func (u *userImpl) CreateSpace(ctx context.Context, space *userEntity.Space) (err error) {
+	return u.SpaceRepo.CreateSpace(ctx, &model.Space{
+		ID:          space.ID,
+		Name:        space.Name,
+		Description: space.Description,
+		IconURI:     space.IconURL,
+		OwnerID:     space.OwnerID,
+		CreatorID:   space.CreatorID,
+		CreatedAt:   space.CreatedAt,
+		UpdatedAt:   space.UpdatedAt,
+	})
+}
+
+func (u *userImpl) AddSpaceUser(ctx context.Context, spaceID, userID int64, roleType int32) (err error) {
+	return u.SpaceRepo.AddSpaceUser(ctx, &model.SpaceUser{
+		SpaceID:   spaceID,
+		UserID:    userID,
+		RoleType:  roleType,
+		CreatedAt: time.Now().UnixMilli(),
+		UpdatedAt: time.Now().UnixMilli(),
+	})
 }
 
 func (u *userImpl) getUniqueNameFormEmail(ctx context.Context, email string) string {

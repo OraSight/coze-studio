@@ -200,10 +200,10 @@ func (k *knowledgeSVC) copyKnowledge(ctx context.Context, copyCtx *knowledgeCopy
 }
 
 func (k *knowledgeSVC) copyKnowledgeDocuments(ctx context.Context, copyCtx *knowledgeCopyCtx) (err error) {
-	// Query document information (only processed documents)
+	// Copy all visible documents; only deleted documents should be skipped.
 	documents, _, err := k.documentRepo.FindDocumentByCondition(ctx, &entity.WhereDocumentOpt{
 		KnowledgeIDs: []int64{copyCtx.OriginData.ID},
-		StatusIn:     []int32{int32(entity.DocumentStatusEnable), int32(entity.DocumentStatusInit)},
+		StatusNotIn:  []int32{int32(entity.DocumentStatusDeleted)},
 		SelectAll:    true,
 	})
 	if err != nil {
@@ -270,7 +270,11 @@ func (k *knowledgeSVC) copyKnowledgeDocuments(ctx context.Context, copyCtx *know
 				mu.Lock()
 				failList = append(failList, doc.ID)
 				mu.Unlock()
-				logs.CtxErrorf(ctx, "copy document failed, src document id: %d, new id: %d, err: %v", doc.ID, newID, err)
+				if isNonFatalKnowledgeCopyErr(cpErr) {
+					logs.CtxWarnf(ctx, "copy document indexed with degraded state, src document id: %d, new id: %d, err: %v", doc.ID, newID, cpErr)
+					return nil
+				}
+				logs.CtxErrorf(ctx, "copy document failed, src document id: %d, new id: %d, err: %v", doc.ID, newID, cpErr)
 				return cpErr
 			}
 			return nil
@@ -280,6 +284,10 @@ func (k *knowledgeSVC) copyKnowledgeDocuments(ctx context.Context, copyCtx *know
 	if err := eg.Wait(); err != nil {
 		logs.CtxErrorf(ctx, "copy document failed, document ids: %v, first-err: %v", failList, err)
 		return errorx.New(errno.ErrKnowledgeCopyFailCode, errorx.KV("msg", err.Error()))
+	}
+
+	if len(failList) > 0 {
+		logs.CtxWarnf(ctx, "copy knowledge completed with degraded document indexing, source document ids: %v, target knowledge id: %d", failList, copyCtx.CopyTask.TargetDataID)
 	}
 
 	return nil
@@ -442,6 +450,11 @@ func (k *knowledgeSVC) copyDocument(ctx context.Context, copyCtx *knowledgeCopyC
 			}
 		}
 
+		err = k.sliceRepo.BatchCreate(ctx, newSliceModels)
+		if err != nil {
+			return errorx.New(errno.ErrKnowledgeDBCode, errorx.KV("msg", err.Error()))
+		}
+
 		ssDocs, err := slices.TransformWithErrorCheck(sliceEntities, func(a *entity.Slice) (*schema.Document, error) {
 			return k.slice2Document(ctx, docEntity, a)
 		})
@@ -462,15 +475,20 @@ func (k *knowledgeSVC) copyDocument(ctx context.Context, copyCtx *knowledgeCopyC
 				return errorx.New(errno.ErrKnowledgeSearchStoreCode, errorx.KV("msg", err.Error()))
 			}
 		}
-
-		err = k.sliceRepo.BatchCreate(ctx, newSliceModels)
-		if err != nil {
-			return errorx.New(errno.ErrKnowledgeDBCode, errorx.KV("msg", err.Error()))
-		}
 	}
 
 	return nil
 }
+
+func isNonFatalKnowledgeCopyErr(err error) bool {
+	var statusErr errorx.StatusError
+	if !errors.As(err, &statusErr) {
+		return false
+	}
+
+	return statusErr.Code() == errno.ErrKnowledgeSearchStoreCode
+}
+
 func (k *knowledgeSVC) createTable(ctx context.Context, doc *model.KnowledgeDocument) error {
 	// Tabular knowledge base, creating tables
 	rdbColumns := []*rdbEntity.Column{}

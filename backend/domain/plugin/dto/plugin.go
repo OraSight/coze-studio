@@ -121,7 +121,8 @@ type CopyPluginRequest struct {
 	PluginID  int64
 	CopyScene consts.CopyScene
 
-	TargetAPPID *int64
+	TargetSpaceID *int64
+	TargetAPPID   *int64
 }
 
 type CopyPluginResponse struct {

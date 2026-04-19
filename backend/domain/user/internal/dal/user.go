@@ -160,3 +160,47 @@ func (dao *UserDAO) GetUsersByIDs(ctx context.Context, userIDs []int64) ([]*mode
 		dao.query.User.ID.In(userIDs...),
 	).Find()
 }
+
+func (dao *UserDAO) DeleteCloneTarget(ctx context.Context, userID int64) error {
+	return dao.query.Transaction(func(tx *query.Query) error {
+		spaces, err := tx.Space.WithContext(ctx).Select(tx.Space.ID).Where(
+			tx.Space.OwnerID.Eq(userID),
+		).Find()
+		if err != nil {
+			return err
+		}
+
+		spaceIDs := make([]int64, 0, len(spaces))
+		for _, space := range spaces {
+			spaceIDs = append(spaceIDs, space.ID)
+		}
+
+		if len(spaceIDs) > 0 {
+			if _, err = tx.SpaceUser.WithContext(ctx).Where(
+				tx.SpaceUser.SpaceID.In(spaceIDs...),
+			).Delete(); err != nil {
+				return err
+			}
+
+			if _, err = tx.Space.WithContext(ctx).Where(
+				tx.Space.ID.In(spaceIDs...),
+			).Delete(); err != nil {
+				return err
+			}
+		}
+
+		if _, err = tx.SpaceUser.WithContext(ctx).Where(
+			tx.SpaceUser.UserID.Eq(userID),
+		).Delete(); err != nil {
+			return err
+		}
+
+		if _, err = tx.User.WithContext(ctx).Where(
+			tx.User.ID.Eq(userID),
+		).Delete(); err != nil {
+			return err
+		}
+
+		return nil
+	})
+}

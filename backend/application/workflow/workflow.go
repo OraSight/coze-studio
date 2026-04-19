@@ -52,6 +52,7 @@ import (
 	"github.com/coze-dev/coze-studio/backend/domain/permission"
 	"github.com/coze-dev/coze-studio/backend/domain/plugin/dto"
 	search "github.com/coze-dev/coze-studio/backend/domain/search/entity"
+	userEntity "github.com/coze-dev/coze-studio/backend/domain/user/entity"
 	domainWorkflow "github.com/coze-dev/coze-studio/backend/domain/workflow"
 	"github.com/coze-dev/coze-studio/backend/domain/workflow/entity"
 	"github.com/coze-dev/coze-studio/backend/domain/workflow/entity/vo"
@@ -59,6 +60,7 @@ import (
 	"github.com/coze-dev/coze-studio/backend/infra/idgen"
 	"github.com/coze-dev/coze-studio/backend/infra/imagex"
 	"github.com/coze-dev/coze-studio/backend/infra/storage"
+	"github.com/coze-dev/coze-studio/backend/pkg/ctxcache"
 	"github.com/coze-dev/coze-studio/backend/pkg/errorx"
 	"github.com/coze-dev/coze-studio/backend/pkg/i18n"
 	"github.com/coze-dev/coze-studio/backend/pkg/lang/conv"
@@ -1214,6 +1216,369 @@ func (w *ApplicationService) copyWorkflow(ctx context.Context, workflowID int64,
 	}
 
 	return wf, nil
+}
+
+func (w *ApplicationService) CloneLibraryWorkflowToSpace(ctx context.Context, workflowID, targetUserID, targetSpaceID int64) (int64, error) {
+	cloneCtx := cloneWorkflowContextForUser(ctx, targetUserID)
+
+	sourceWorkflow, err := GetWorkflowDomainSVC().Get(cloneCtx, &vo.GetPolicy{
+		ID:    workflowID,
+		QType: workflowModel.FromDraft,
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	if sourceWorkflow.CanvasInfo == nil {
+		return 0, fmt.Errorf("workflow canvas not found, workflowID=%d", workflowID)
+	}
+
+	relatedWorkflowMap := make(map[int64]entity.IDVersionPair)
+	relatedExternal := vo.ExternalResourceRelated{
+		PluginMap:     make(map[int64]*vo.PluginEntity),
+		PluginToolMap: make(map[int64]int64),
+		KnowledgeMap:  make(map[int64]int64),
+		DatabaseMap:   make(map[int64]int64),
+	}
+
+	newWorkflowID, err := w.cloneLibraryWorkflowRecursively(cloneCtx, workflowID, targetUserID, targetSpaceID, relatedWorkflowMap, relatedExternal)
+	if err != nil {
+		return 0, err
+	}
+
+	if err = w.syncClonedWorkflowPublishState(cloneCtx, sourceWorkflow, relatedWorkflowMap); err != nil {
+		return 0, err
+	}
+
+	return newWorkflowID, nil
+}
+
+func cloneWorkflowContextForUser(ctx context.Context, userID int64) context.Context {
+	cloneCtx := ctxcache.Init(ctx)
+	ctxcache.Store(cloneCtx, consts.SessionDataKeyInCtx, &userEntity.Session{UserID: userID})
+	return cloneCtx
+}
+
+func (w *ApplicationService) syncClonedWorkflowPublishState(ctx context.Context, sourceWorkflow *entity.Workflow, relatedWorkflowMap map[int64]entity.IDVersionPair) error {
+	for sourceWorkflowID, copiedWorkflow := range relatedWorkflowMap {
+		sourcePublishedVersion := sourceWorkflow.GetLatestVersion()
+		if sourceWorkflowID != sourceWorkflow.ID {
+			wf, err := GetWorkflowDomainSVC().Get(ctx, &vo.GetPolicy{
+				ID:    sourceWorkflowID,
+				QType: workflowModel.FromDraft,
+			})
+			if err != nil {
+				return err
+			}
+			sourcePublishedVersion = wf.GetLatestVersion()
+		}
+
+		if sourcePublishedVersion == "" {
+			continue
+		}
+
+		copiedDraft, err := GetWorkflowDomainSVC().Get(ctx, &vo.GetPolicy{
+			ID:    copiedWorkflow.ID,
+			QType: workflowModel.FromDraft,
+		})
+		if err != nil {
+			return err
+		}
+
+		if err = w.publishWorkflowResource(ctx, &vo.PublishPolicy{
+			ID:        copiedWorkflow.ID,
+			Version:   sourcePublishedVersion,
+			CommitID:  copiedDraft.CommitID,
+			CreatorID: copiedDraft.CreatorID,
+			Force:     true,
+		}); err != nil {
+			return err
+		}
+
+		relatedWorkflowMap[sourceWorkflowID] = entity.IDVersionPair{
+			ID:      copiedWorkflow.ID,
+			Version: sourcePublishedVersion,
+		}
+	}
+
+	return nil
+}
+
+func (w *ApplicationService) cloneLibraryWorkflowRecursively(
+	ctx context.Context,
+	workflowID, targetUserID, targetSpaceID int64,
+	relatedWorkflowMap map[int64]entity.IDVersionPair,
+	relatedExternal vo.ExternalResourceRelated,
+) (int64, error) {
+	if copied, ok := relatedWorkflowMap[workflowID]; ok {
+		return copied.ID, nil
+	}
+
+	ds, err := GetWorkflowDomainSVC().GetWorkflowDependenceResource(ctx, workflowID)
+	if err != nil {
+		return 0, err
+	}
+
+	for _, pluginID := range ds.PluginIDs {
+		if _, ok := relatedExternal.PluginMap[pluginID]; ok {
+			continue
+		}
+		response, err := appplugin.PluginApplicationSVC.CopyPlugin(ctx, &dto.CopyPluginRequest{
+			PluginID:      pluginID,
+			UserID:        targetUserID,
+			CopyScene:     pluginConsts.CopySceneOfToLibrary,
+			TargetSpaceID: ptr.Of(targetSpaceID),
+		})
+		if err != nil {
+			return 0, err
+		}
+		relatedExternal.PluginMap[pluginID] = &vo.PluginEntity{
+			PluginID:      response.Plugin.ID,
+			PluginVersion: response.Plugin.Version,
+		}
+		for oldToolID, newTool := range response.Tools {
+			relatedExternal.PluginToolMap[oldToolID] = newTool.ID
+		}
+	}
+
+	for _, knowledgeID := range ds.KnowledgeIDs {
+		if _, ok := relatedExternal.KnowledgeMap[knowledgeID]; ok {
+			continue
+		}
+		response, err := appknowledge.KnowledgeSVC.CopyKnowledge(ctx, &model.CopyKnowledgeRequest{
+			KnowledgeID:   knowledgeID,
+			TargetSpaceID: targetSpaceID,
+			TargetUserID:  targetUserID,
+			TaskUniqKey:   strconv.FormatInt(time.Now().UnixNano(), 10),
+		})
+		if err != nil {
+			return 0, err
+		}
+		if response.CopyStatus == model.CopyStatus_Failed {
+			return 0, fmt.Errorf("failed to copy knowledge, knowledge id=%d", knowledgeID)
+		}
+		relatedExternal.KnowledgeMap[knowledgeID] = response.TargetKnowledgeID
+	}
+
+	if len(ds.DatabaseIDs) > 0 {
+		pendingDatabaseIDs := make([]int64, 0, len(ds.DatabaseIDs))
+		for _, databaseID := range ds.DatabaseIDs {
+			if _, ok := relatedExternal.DatabaseMap[databaseID]; ok {
+				continue
+			}
+			pendingDatabaseIDs = append(pendingDatabaseIDs, databaseID)
+		}
+		if len(pendingDatabaseIDs) > 0 {
+			response, err := appmemory.DatabaseApplicationSVC.CopyDatabase(ctx, &appmemory.CopyDatabaseRequest{
+				DatabaseIDs:   pendingDatabaseIDs,
+				TableType:     table.TableType_OnlineTable,
+				CreatorID:     targetUserID,
+				IsCopyData:    true,
+				TargetSpaceID: ptr.Of(targetSpaceID),
+			})
+			if err != nil {
+				return 0, err
+			}
+			for oldID, newDatabase := range response.Databases {
+				relatedExternal.DatabaseMap[oldID] = newDatabase.ID
+			}
+		}
+	}
+
+	wf, err := GetWorkflowDomainSVC().Get(ctx, &vo.GetPolicy{
+		ID:    workflowID,
+		QType: workflowModel.FromDraft,
+	})
+	if err != nil {
+		return 0, err
+	}
+	if wf.CanvasInfo == nil {
+		return 0, fmt.Errorf("workflow canvas not found, workflowID=%d", workflowID)
+	}
+
+	canvas := &vo.Canvas{}
+	err = sonic.UnmarshalString(wf.Canvas, canvas)
+	if err != nil {
+		return 0, err
+	}
+
+	if err = w.cloneNestedLibraryWorkflowRefs(ctx, canvas.Nodes, targetUserID, targetSpaceID, relatedWorkflowMap, relatedExternal); err != nil {
+		return 0, err
+	}
+
+	modifiedCanvas, err := sonic.MarshalString(canvas)
+	if err != nil {
+		return 0, err
+	}
+
+	copiedWorkflow, err := w.copyWorkflow(ctx, workflowID, vo.CopyWorkflowPolicy{
+		TargetSpaceID:            ptr.Of(targetSpaceID),
+		TargetAppID:              ptr.Of(int64(0)),
+		ModifiedCanvasSchema:     ptr.Of(modifiedCanvas),
+		ShouldModifyWorkflowName: false,
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	relatedWorkflowMap[workflowID] = entity.IDVersionPair{ID: copiedWorkflow.ID}
+	return copiedWorkflow.ID, nil
+}
+
+func (w *ApplicationService) cloneNestedLibraryWorkflowRefs(
+	ctx context.Context,
+	nodes []*vo.Node,
+	targetUserID, targetSpaceID int64,
+	relatedWorkflowMap map[int64]entity.IDVersionPair,
+	relatedExternal vo.ExternalResourceRelated,
+) error {
+	for _, node := range nodes {
+		if node == nil || node.Data == nil || node.Data.Inputs == nil {
+			continue
+		}
+
+		if node.Type == entity.NodeTypeSubWorkflow.IDStr() && node.Data.Inputs.WorkflowID != "" {
+			workflowID, err := strconv.ParseInt(node.Data.Inputs.WorkflowID, 10, 64)
+			if err != nil {
+				return err
+			}
+			newWorkflowID, err := w.cloneLibraryWorkflowRecursively(ctx, workflowID, targetUserID, targetSpaceID, relatedWorkflowMap, relatedExternal)
+			if err != nil {
+				return err
+			}
+			node.Data.Inputs.WorkflowID = strconv.FormatInt(newWorkflowID, 10)
+		}
+
+		if node.Type == entity.NodeTypeLLM.IDStr() && node.Data.Inputs.LLM != nil && node.Data.Inputs.FCParam != nil && node.Data.Inputs.FCParam.WorkflowFCParam != nil {
+			for _, workflowInfo := range node.Data.Inputs.FCParam.WorkflowFCParam.WorkflowList {
+				if workflowInfo.WorkflowID == "" {
+					continue
+				}
+				workflowID, err := strconv.ParseInt(workflowInfo.WorkflowID, 10, 64)
+				if err != nil {
+					return err
+				}
+				newWorkflowID, err := w.cloneLibraryWorkflowRecursively(ctx, workflowID, targetUserID, targetSpaceID, relatedWorkflowMap, relatedExternal)
+				if err != nil {
+					return err
+				}
+				workflowInfo.WorkflowID = strconv.FormatInt(newWorkflowID, 10)
+			}
+		}
+
+		if err := replaceLibraryWorkflowExternalResources([]*vo.Node{node}, relatedWorkflowMap, relatedExternal); err != nil {
+			return err
+		}
+
+		if len(node.Blocks) > 0 {
+			if err := w.cloneNestedLibraryWorkflowRefs(ctx, node.Blocks, targetUserID, targetSpaceID, relatedWorkflowMap, relatedExternal); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func replaceLibraryWorkflowExternalResources(nodes []*vo.Node, relatedWorkflows map[int64]entity.IDVersionPair, related vo.ExternalResourceRelated) error {
+	for _, node := range nodes {
+		if node == nil || node.Data == nil || node.Data.Inputs == nil {
+			continue
+		}
+
+		if node.Data.Inputs.DatabaseNode != nil {
+			for _, databaseInfo := range node.Data.Inputs.DatabaseInfoList {
+				if databaseInfo == nil {
+					continue
+				}
+				databaseID, err := strconv.ParseInt(databaseInfo.DatabaseInfoID, 10, 64)
+				if err != nil {
+					return err
+				}
+				if newDatabaseID, ok := related.DatabaseMap[databaseID]; ok {
+					databaseInfo.DatabaseInfoID = strconv.FormatInt(newDatabaseID, 10)
+				}
+			}
+		}
+
+		if node.Data.Inputs.Knowledge != nil && len(node.Data.Inputs.DatasetParam) > 0 {
+			knowledgeIDs, ok := node.Data.Inputs.DatasetParam[0].Input.Value.Content.([]any)
+			if ok {
+				for idx := range knowledgeIDs {
+					knowledgeID, err := strconv.ParseInt(knowledgeIDs[idx].(string), 10, 64)
+					if err != nil {
+						return err
+					}
+					if newKnowledgeID, ok := related.KnowledgeMap[knowledgeID]; ok {
+						knowledgeIDs[idx] = strconv.FormatInt(newKnowledgeID, 10)
+					}
+				}
+			}
+		}
+
+		if node.Data.Inputs.PluginAPIParam != nil {
+			apiParams := slices.ToMap(node.Data.Inputs.APIParams, func(param *vo.Param) (string, *vo.Param) {
+				return param.Name, param
+			})
+			pluginIDParam := apiParams["pluginID"]
+			pluginVersionParam := apiParams["pluginVersion"]
+			toolIDParam := apiParams["toolID"]
+			if pluginIDParam != nil {
+				pluginID, err := strconv.ParseInt(pluginIDParam.Input.Value.Content.(string), 10, 64)
+				if err != nil {
+					return err
+				}
+				if newPlugin, ok := related.PluginMap[pluginID]; ok {
+					pluginIDParam.Input.Value.Content = strconv.FormatInt(newPlugin.PluginID, 10)
+					if pluginVersionParam != nil && newPlugin.PluginVersion != nil {
+						pluginVersionParam.Input.Value.Content = *newPlugin.PluginVersion
+					}
+				}
+			}
+			if toolIDParam != nil {
+				toolID, err := strconv.ParseInt(toolIDParam.Input.Value.Content.(string), 10, 64)
+				if err != nil {
+					return err
+				}
+				if newToolID, ok := related.PluginToolMap[toolID]; ok {
+					toolIDParam.Input.Value.Content = strconv.FormatInt(newToolID, 10)
+				}
+			}
+		}
+
+		if node.Type == entity.NodeTypeSubWorkflow.IDStr() && node.Data.Inputs.WorkflowID != "" {
+			workflowID, err := strconv.ParseInt(node.Data.Inputs.WorkflowID, 10, 64)
+			if err != nil {
+				return err
+			}
+			if newWorkflow, ok := relatedWorkflows[workflowID]; ok {
+				node.Data.Inputs.WorkflowID = strconv.FormatInt(newWorkflow.ID, 10)
+			}
+		}
+
+		if node.Type == entity.NodeTypeLLM.IDStr() && node.Data.Inputs.LLM != nil && node.Data.Inputs.FCParam != nil && node.Data.Inputs.FCParam.WorkflowFCParam != nil {
+			for _, workflowInfo := range node.Data.Inputs.FCParam.WorkflowFCParam.WorkflowList {
+				if workflowInfo.WorkflowID == "" {
+					continue
+				}
+				workflowID, err := strconv.ParseInt(workflowInfo.WorkflowID, 10, 64)
+				if err != nil {
+					return err
+				}
+				if newWorkflow, ok := relatedWorkflows[workflowID]; ok {
+					workflowInfo.WorkflowID = strconv.FormatInt(newWorkflow.ID, 10)
+				}
+			}
+		}
+
+		if len(node.Blocks) > 0 {
+			if err := replaceLibraryWorkflowExternalResources(node.Blocks, relatedWorkflows, related); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 func (w *ApplicationService) MoveWorkflowFromAppToLibrary(ctx context.Context, workflowID int64, spaceID, /*not used for now*/

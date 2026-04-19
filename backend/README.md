@@ -74,6 +74,67 @@ go run main.go
 
 默认监听：`http://localhost:8888`
 
+## 方式二：使用同级 Dockerfile 打包后端镜像
+
+当前目录下提供了用于后端服务的 Dockerfile：
+
+- `backend/Dockerfile`
+
+这个 Dockerfile 的 `COPY` 指令依赖仓库根目录作为构建上下文，例如：
+
+- `COPY backend/...`
+- `COPY docker/.env.example ...`
+
+因此不要把 `backend/` 目录本身作为 build context，否则会找不到这些文件。
+
+### 1) 在仓库根目录构建镜像
+
+推荐在仓库根目录执行：
+
+```bash
+docker build -f backend/Dockerfile -t coze-backend:latest .
+```
+
+如果你当前就在 `backend/` 目录，也可以执行：
+
+```bash
+docker build -f Dockerfile -t coze-backend:latest ..
+```
+
+### 2) 运行镜像
+
+最简单的运行方式：
+
+```bash
+docker run --rm -p 8888:8888 --name coze-backend coze-backend:latest
+```
+
+如果你希望显式指定环境文件：
+
+```bash
+docker run --rm -p 8888:8888 --name coze-backend \
+  --env-file docker/.env.example \
+  coze-backend:latest
+```
+
+### 3) 与中间件配合使用
+
+这个镜像只打包后端应用本身，不会自动帮你启动 MySQL、Redis、Elasticsearch、Milvus、MinIO、NSQ 等依赖。
+
+如果你本地要联调，建议先在仓库根目录启动依赖服务：
+
+```bash
+make middleware
+```
+
+然后再运行刚才打好的后端镜像。
+
+### 4) 注意事项
+
+- Dockerfile 当前会复制 `backend/conf`，但没有复制前端静态资源目录 `backend/static`。
+- 如果你的使用场景只需要后端 API，这个镜像可以直接使用。
+- 如果你希望同时通过这个镜像提供完整站点静态资源，需要确认前端静态资源是否已按你的部署方式一并打入镜像或由其他服务提供。
+
 ## 常用开发命令
 
 在仓库根目录执行：
