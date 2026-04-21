@@ -18,7 +18,11 @@ package user
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"strings"
+
+	"gorm.io/gorm"
 
 	userEntity "github.com/coze-dev/coze-studio/backend/domain/user/entity"
 )
@@ -141,4 +145,49 @@ func (u *UserApplicationService) BindUserToClonedSpaces(ctx context.Context, tar
 
 func (u *UserApplicationService) RollbackCloneTarget(ctx context.Context, targetUserID int64) error {
 	return u.userRepo.DeleteCloneTarget(ctx, targetUserID)
+}
+
+func (u *UserApplicationService) ResolveUserID(ctx context.Context, userID int64, email string) (int64, bool, error) {
+	email = strings.TrimSpace(email)
+
+	if userID > 0 {
+		userModel, err := u.userRepo.GetUserByID(ctx, userID)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return 0, false, nil
+		}
+		if err != nil {
+			return 0, false, err
+		}
+
+		if email == "" {
+			return userModel.ID, true, nil
+		}
+
+		emailModel, exist, err := u.userRepo.GetUsersByEmail(ctx, email)
+		if err != nil {
+			return 0, false, err
+		}
+		if !exist {
+			return 0, false, nil
+		}
+		if emailModel.ID != userModel.ID {
+			return 0, false, fmt.Errorf("user_id and email refer to different users")
+		}
+
+		return userModel.ID, true, nil
+	}
+
+	if email == "" {
+		return 0, false, nil
+	}
+
+	userModel, exist, err := u.userRepo.GetUsersByEmail(ctx, email)
+		if err != nil {
+			return 0, false, err
+		}
+		if !exist {
+			return 0, false, nil
+		}
+
+	return userModel.ID, true, nil
 }

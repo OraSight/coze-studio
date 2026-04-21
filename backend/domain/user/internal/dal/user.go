@@ -182,7 +182,7 @@ func (dao *UserDAO) DeleteCloneTarget(ctx context.Context, userID int64) error {
 				return err
 			}
 
-			if _, err = tx.Space.WithContext(ctx).Where(
+			if _, err = tx.Space.WithContext(ctx).Unscoped().Where(
 				tx.Space.ID.In(spaceIDs...),
 			).Delete(); err != nil {
 				return err
@@ -195,7 +195,7 @@ func (dao *UserDAO) DeleteCloneTarget(ctx context.Context, userID int64) error {
 			return err
 		}
 
-		if _, err = tx.User.WithContext(ctx).Where(
+		if _, err = tx.User.WithContext(ctx).Unscoped().Where(
 			tx.User.ID.Eq(userID),
 		).Delete(); err != nil {
 			return err

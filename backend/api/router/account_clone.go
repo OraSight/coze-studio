@@ -24,4 +24,6 @@ import (
 
 func customRouteRegister(r *server.Hertz) {
 	r.POST("/api/passport/account/clone/", handler.PassportAccountClonePost)
+	r.POST("/api/passport/account/exist/", handler.PassportAccountExistPost)
+	r.POST("/api/passport/account/delete/", handler.PassportAccountDeletePost)
 }

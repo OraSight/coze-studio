@@ -52,6 +52,8 @@ func (s *SingleAgentApplicationService) PrepareDraftBotClone(ctx context.Context
 		return nil, nil, err
 	}
 
+	newAgent.Name = draftAgent.Name
+
 	return draftAgent, newAgent, nil
 }
 

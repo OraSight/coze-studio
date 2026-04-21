@@ -78,6 +78,25 @@ type CloneAccountResponse struct {
 	Summary *CloneAccountSummary `json:"summary,omitempty"`
 }
 
+type AccountExistsRequest struct {
+	UserID int64
+	Email  string
+}
+
+type AccountExistsResponse struct {
+	Exists bool  `json:"exists"`
+	UserID int64 `json:"user_id,string,omitempty"`
+}
+
+type DeleteAccountRequest struct {
+	UserID int64
+	Email  string
+}
+
+type DeleteAccountResponse struct {
+	UserID int64 `json:"user_id,string"`
+}
+
 type sourceAssets struct {
 	Projects         []*searchEntity.ProjectDocument
 	Bots             []*searchEntity.ProjectDocument
@@ -86,6 +105,61 @@ type sourceAssets struct {
 	LibraryKnowledge []*searchModel.ResourceDocument
 	LibraryDatabases []*searchModel.ResourceDocument
 	RequiredSpaceIDs map[int64]struct{}
+}
+
+func CheckAccountExists(ctx context.Context, req *AccountExistsRequest) (*AccountExistsResponse, error) {
+	if ctxutil.GetUIDFromCtx(ctx) == nil {
+		return nil, errorx.New(errno.ErrUserPermissionCode, errorx.KV("msg", "session is required"))
+	}
+
+	userID, exist, err := userApp.UserApplicationSVC.ResolveUserID(ctx, req.UserID, req.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	return &AccountExistsResponse{
+		Exists: exist,
+		UserID: userID,
+	}, nil
+}
+
+func DeleteAccount(ctx context.Context, req *DeleteAccountRequest) (*DeleteAccountResponse, error) {
+	if ctxutil.GetUIDFromCtx(ctx) == nil {
+		return nil, errorx.New(errno.ErrUserPermissionCode, errorx.KV("msg", "session is required"))
+	}
+
+	targetUserID, exist, err := userApp.UserApplicationSVC.ResolveUserID(ctx, req.UserID, req.Email)
+	if err != nil {
+		return nil, err
+	}
+	if !exist {
+		missingRef := req.Email
+		if missingRef == "" {
+			missingRef = conv.Int64ToStr(req.UserID)
+		}
+		return nil, errorx.New(errno.ErrUserResourceNotFound, errorx.KV("type", "user"), errorx.KV("id", missingRef))
+	}
+
+	_, spaces, err := userApp.UserApplicationSVC.GetCloneSource(ctx, targetUserID)
+	if err != nil {
+		return nil, err
+	}
+
+	ownedSpaces := filterOwnedSpaces(spaces, targetUserID)
+	targetSpaceIDs := make(map[int64]int64, len(ownedSpaces))
+	for _, space := range ownedSpaces {
+		if space == nil {
+			continue
+		}
+		targetSpaceIDs[space.ID] = space.ID
+	}
+
+	if err := rollbackClonedAccount(ctx, targetUserID, targetSpaceIDs); err != nil {
+		logs.CtxErrorf(ctx, "[account_clone] delete account rollback failed, targetUserID=%d err=%v", targetUserID, err)
+		return nil, err
+	}
+
+	return &DeleteAccountResponse{UserID: targetUserID}, nil
 }
 
 func CloneCurrentAccount(ctx context.Context, req *CloneAccountRequest) (resp *CloneAccountResponse, err error) {
@@ -212,26 +286,33 @@ func rollbackClonedAccount(ctx context.Context, targetUserID int64, spaceIDMap m
 
 	if len(targetSpaceIDs) > 0 {
 		if err := rollbackClonedBots(rollbackCtx, targetUserID, targetSpaceIDs); err != nil {
-			rollbackErrs = append(rollbackErrs, err)
-		}
-		if err := rollbackClonedProjects(rollbackCtx, targetUserID, targetSpaceIDs); err != nil {
+			logs.CtxErrorf(ctx, "[account_clone] rollback bots failed, targetUserID=%d err=%v", targetUserID, err)
 			rollbackErrs = append(rollbackErrs, err)
 		}
 		if err := rollbackClonedWorkflows(rollbackCtx, targetUserID, targetSpaceIDs); err != nil {
+			logs.CtxErrorf(ctx, "[account_clone] rollback workflows failed, targetUserID=%d err=%v", targetUserID, err)
 			rollbackErrs = append(rollbackErrs, err)
 		}
 		if err := rollbackClonedPlugins(rollbackCtx, targetUserID, targetSpaceIDs); err != nil {
+			logs.CtxErrorf(ctx, "[account_clone] rollback plugins failed, targetUserID=%d err=%v", targetUserID, err)
 			rollbackErrs = append(rollbackErrs, err)
 		}
 		if err := rollbackClonedKnowledge(rollbackCtx, targetUserID, targetSpaceIDs); err != nil {
+			logs.CtxErrorf(ctx, "[account_clone] rollback knowledge failed, targetUserID=%d err=%v", targetUserID, err)
 			rollbackErrs = append(rollbackErrs, err)
 		}
 		if err := rollbackClonedDatabases(rollbackCtx, targetUserID, targetSpaceIDs); err != nil {
+			logs.CtxErrorf(ctx, "[account_clone] rollback databases failed, targetUserID=%d err=%v", targetUserID, err)
+			rollbackErrs = append(rollbackErrs, err)
+		}
+		if err := rollbackClonedProjects(rollbackCtx, targetUserID, targetSpaceIDs); err != nil {
+			logs.CtxErrorf(ctx, "[account_clone] rollback projects failed, targetUserID=%d err=%v", targetUserID, err)
 			rollbackErrs = append(rollbackErrs, err)
 		}
 	}
 
 	if err := userApp.UserApplicationSVC.RollbackCloneTarget(ctx, targetUserID); err != nil {
+		logs.CtxErrorf(ctx, "[account_clone] rollback user cleanup failed, targetUserID=%d err=%v", targetUserID, err)
 		rollbackErrs = append(rollbackErrs, err)
 	}
 
@@ -546,6 +627,22 @@ func filterSpaces(sourceSpaces []*userEntity.Space, requiredSpaceIDs map[int64]s
 		}
 	}
 	return spaces
+}
+
+func filterOwnedSpaces(spaces []*userEntity.Space, ownerID int64) []*userEntity.Space {
+	if len(spaces) == 0 {
+		return nil
+	}
+
+	ownedSpaces := make([]*userEntity.Space, 0, len(spaces))
+	for _, space := range spaces {
+		if space == nil || space.OwnerID != ownerID {
+			continue
+		}
+		ownedSpaces = append(ownedSpaces, space)
+	}
+
+	return ownedSpaces
 }
 
 func userAppIsValidEmail(email string) bool {
