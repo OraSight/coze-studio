@@ -27,6 +27,11 @@ const runAutoLogin = async () => {
   try {
     const url = new URL(window.location.href);
     const token = url.searchParams.get('token');
+    const name = url.searchParams.get('name');
+    const type = url.searchParams.get('type');
+    if (!name || !type) {
+      return true;
+    }
     if (token) {
       document.cookie = `token=${encodeURIComponent(token)}; path=/`;
     }
@@ -34,9 +39,20 @@ const runAutoLogin = async () => {
     const res = await fetch('/core-api/autologin', {
       method: 'POST',
       credentials: 'include',
+      body: JSON.stringify({ res_name: name, res_type: type }),
     });
 
     if (res.ok) {
+      const payload = await res
+        .clone()
+        .json()
+        .catch(() => null);
+      const responseUrl =
+        payload && typeof payload.url === 'string' ? payload.url.trim() : '';
+      if (responseUrl) {
+        window.location.replace(responseUrl);
+        return false;
+      }
       const redirect = url.searchParams.get('redirect');
       if (redirect && redirect.startsWith('/')) {
         window.location.replace(redirect);
