@@ -65,7 +65,7 @@ export const DisplayAllSwitch: React.FC = observer(() => {
         size="mini"
         checked={value}
         onChange={handleChange}
-        disabled={true}
+        disabled={disabled}
       />
     </div>
   );

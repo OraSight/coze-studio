@@ -59,7 +59,7 @@ export const ImportKnowledgeSourceButton = ({
         <Button
           data-testid={KnowledgeE2e.SegmentDetailAddBtn}
           color="hgltplus"
-          disabled={true}
+          disabled
           iconPosition="right"
           icon={<IconCozArrowDown className={'text-[12px]'} />}
         >
@@ -102,7 +102,6 @@ export const ImportKnowledgeSourceButton = ({
               <IconCozArrowDown className={'text-[12px]'} />
             )
           }
-          disabled={true}
         >
           {I18n.t('knowledg_unit_add_segments')}
         </Button>

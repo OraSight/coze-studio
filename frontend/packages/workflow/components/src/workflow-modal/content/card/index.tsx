@@ -238,9 +238,13 @@ export const WorkflowCard: FC<WorkflowCardProps> = props => {
       );
       const ButtonContent = (
         <LoadingButton
-          disabled={true}
           color="primary"
           data-testid="workflow.modal.add"
+          disabled={botAgentCheckResult && !botAgentCheckResult?.is_pass}
+          onClick={async e => {
+            e.stopPropagation();
+            await dupWorkflowTpl();
+          }}
         >
           {dupText || I18n.t('workflowstore_duplicate_and_add')}
         </LoadingButton>

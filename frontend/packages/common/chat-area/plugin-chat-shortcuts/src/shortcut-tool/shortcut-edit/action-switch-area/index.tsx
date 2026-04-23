@@ -49,7 +49,6 @@ export interface IActionSwitchAreaProps {
   formRef: RefObject<Form>;
   modalRef?: RefObject<HTMLDivElement>;
   isBanned: boolean;
-  disabled?: boolean;
 }
 
 export interface IActionSwitchAreaRef {
@@ -67,7 +66,6 @@ export const ActionSwitchArea = forwardRef<
     formRef,
     isBanned,
     modalRef,
-    disabled = false,
   } = props;
 
   const useTool = editedShortcut?.use_tool ?? false;
@@ -164,7 +162,6 @@ export const ActionSwitchArea = forwardRef<
       <SkillSwitch
         skillModal={SkillModal}
         isBanned={isBanned}
-        disabled={disabled}
         onToolChange={onToolParamsChange}
         editedShortcut={editedShortcut}
       />
@@ -172,7 +169,7 @@ export const ActionSwitchArea = forwardRef<
         toolType={useTool ? ToolType.ToolTypePlugin : undefined}
         toolInfo={editedShortcut?.tool_info ?? {}}
         ref={componentsRef}
-        disabled={isBanned || disabled}
+        disabled={isBanned}
         components={components}
         onChange={newComponents => {
           setComponents(newComponents);
@@ -183,7 +180,6 @@ export const ActionSwitchArea = forwardRef<
         value={editedShortcut?.template_query || ''}
         components={components}
         modalRef={modalRef}
-        disabled={disabled}
       />
       {ConfirmModal}
     </>

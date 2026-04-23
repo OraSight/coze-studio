@@ -21,6 +21,8 @@ import { I18n } from '@coze-arch/i18n';
 import {
   UIButton,
   UIModal,
+  RadioGroup,
+  Radio,
   Typography,
 } from '@coze-arch/bot-semi';
 
@@ -55,7 +57,7 @@ export interface ImportModalProps {
 
 export const ImportModal: React.FC<ImportModalProps> = props => {
   const { onCancel, visible, onOk, title } = props;
-  const [importType] = useState(ImportType.File);
+  const [importType, setImportType] = useState(ImportType.File);
   const [content, setContent] = useState<string>();
   const [errMsg, setErrMsg] = useState<string>();
   const [loading, setLoading] = useState(false);
@@ -67,6 +69,7 @@ export const ImportModal: React.FC<ImportModalProps> = props => {
   };
 
   const reset = () => {
+    setImportType(ImportType.File);
     setContent(undefined);
   };
 
@@ -105,7 +108,7 @@ export const ImportModal: React.FC<ImportModalProps> = props => {
     <UIButton
       theme="solid"
       type="primary"
-      disabled={true}
+      disabled={!content}
       onClick={handleParse}
       loading={loading}
     >
@@ -156,6 +159,22 @@ export const ImportModal: React.FC<ImportModalProps> = props => {
         className={styles['import-modal']}
       >
         <div className="min-h-[472px]">
+          <div className="flex justify-center mb-[24px]">
+            <RadioGroup
+              onChange={e => {
+                setImportType(e.target.value);
+                setContent(undefined);
+              }}
+              type="button"
+              buttonSize="middle"
+              defaultValue={importType}
+              disabled={loading}
+              className={styles['radio-group']}
+            >
+              <Radio value={ImportType.File}>{I18n.t('local_file')}</Radio>
+              <Radio value={ImportType.Text}>{I18n.t('url_raw_data')}</Radio>
+            </RadioGroup>
+          </div>
           <div>
             {importType === ImportType.File ? (
               <FileUpload onUpload={handleContent} disabled={loading} />

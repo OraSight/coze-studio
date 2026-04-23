@@ -55,6 +55,7 @@ export const KnowledgeModalNavBar: React.FC<KnowledgeModalNavBarProps> = ({
   docInfo,
   onBack,
   beforeBack,
+  importKnowledgeSourceButton,
 }) => {
   const setSearchValue = useKnowledgeStore(state => state.setSearchValue);
   const dataSetDetail = useKnowledgeStore(state => state.dataSetDetail);
@@ -111,6 +112,7 @@ export const KnowledgeModalNavBar: React.FC<KnowledgeModalNavBarProps> = ({
         <Space spacing={12}>
           {isImageFormat ? <PhotoFilter /> : null}
           {/* import button */}
+          {canEdit ? importKnowledgeSourceButton : null}
           {actionButtons}
         </Space>
       </div>

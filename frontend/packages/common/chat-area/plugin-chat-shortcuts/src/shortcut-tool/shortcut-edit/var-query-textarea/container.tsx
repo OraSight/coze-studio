@@ -59,11 +59,11 @@ const ExpressionEditorContainer = forwardRef<
     variableTree,
     placeholder,
     onChange,
+    readonly = false,
     style,
     className,
     getPopupContainer,
   } = props;
-  const readonly = true;
 
   const [focus, _setFocus] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);

@@ -301,7 +301,6 @@ export const PromptLibrary = ({
               />
               {isEmptyList ? null : (
                 <Button
-                  disabled={true}
                   type="primary"
                   className="!coz-mg-hglt !coz-fg-hglt hover:!coz-mg-hglt-hovered active:!coz-mg-hglt-pressed"
                   icon={<IconCozPlus />}

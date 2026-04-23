@@ -49,14 +49,13 @@ type VProps = CommonFieldProps & Pick<UsageWithVarTextAreaProps, 'value'>;
 interface VarQueryTextareaWrapper extends VProps {
   components?: shortcut_command.Components[];
   modalRef?: RefObject<HTMLDivElement>;
-  disabled?: boolean;
 }
 
 const maxCount = 3000;
 
 const VarQueryTextareaWrapperWithField: FC<VarQueryTextareaWrapper> = props => {
   const { components, modalRef, ...innerProps } = props;
-  const { value, field, disabled } = props;
+  const { value, field } = props;
   const [showLinBtnPopup, setShowLinkBtnPopup] = useState(false);
   const editorRef = useRef<ExpressionEditorContainerRef>(null);
   const { errors } = useFormState();
@@ -102,7 +101,7 @@ const VarQueryTextareaWrapperWithField: FC<VarQueryTextareaWrapper> = props => {
         >
           {I18n.t('shortcut_modal_query_content')}
         </FieldLabel>
-        {hasComponents && !disabled ? (
+        {hasComponents ? (
           <ComponentsSelectPopover
             visible={showLinBtnPopup}
             components={validComponents}

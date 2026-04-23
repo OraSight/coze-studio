@@ -375,9 +375,9 @@ export function CreateWorkflowModal({
             {I18n.t('workflow_list_create_modal_footer_cancel')}
           </Button>
           <LoadingButton
-            disabled={true}
             className="min-w-[96px]"
             color="hgltplus"
+            disabled={confirmDisabled}
             onClick={
               mode === 'add' ? handleCreateWorkflow : handleUpdateWorkflow
             }

@@ -53,7 +53,7 @@ export const AgentConfigArea: React.FC<AgentConfigAreaProps> = props => {
         <div className={s['sheet-title-node-cover']}>
           <BotConfigArea
             pageFrom={pageFrom}
-            editable={false}
+            editable={editable}
             modelListExtraHeaderSlot={props.modelListExtraHeaderSlot}
           />
         </div>

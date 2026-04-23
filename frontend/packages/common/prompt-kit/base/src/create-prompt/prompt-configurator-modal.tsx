@@ -70,11 +70,13 @@ export const PromptConfiguratorModal = (
   props: PromptConfiguratorModalProps,
 ) => {
   const {
+    mode,
     editId,
     spaceId,
     botId,
     projectId,
     workflowId,
+    canEdit,
     onUpdateSuccess,
     promptSectionConfig,
     enableDiff,
@@ -83,7 +85,6 @@ export const PromptConfiguratorModal = (
     source,
     containerAppendSlot,
   } = props;
-  const mode = 'info';
   const formApiRef = useRef<FormApi | null>(null);
   const editor = useEditor<EditorAPI>();
   const [modalMode, setModalMode] = useState<'info' | 'edit' | 'create'>(mode);
@@ -230,7 +231,7 @@ export const PromptConfiguratorModal = (
       <Modal
         title={
           <PromptHeader
-            canEdit={false}
+            canEdit={!!canEdit}
             mode={modalMode}
             onEditIconClick={() => {
               setModalMode('edit');

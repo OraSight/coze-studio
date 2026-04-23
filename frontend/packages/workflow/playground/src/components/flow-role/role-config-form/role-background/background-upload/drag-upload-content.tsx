@@ -61,7 +61,7 @@ const BaseDragUploadContent: React.FC<BaseDragUploadContentProps> = ({
     >
       {I18n.t('upload_image_format_requirement')}
     </Typography.Text>
-    <Button disabled={true} onClick={onUpload} color="primary">
+    <Button onClick={onUpload} color="primary">
       {I18n.t('upload_image')}
     </Button>
   </div>

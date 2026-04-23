@@ -48,7 +48,7 @@ export const DuplicateButton = ({ mode }: Props) => {
   const operation = useWorkflowOperation();
 
   /** Replication disabled at runtime */
-  const disabled = true; // viewStatus === WorkflowExecStatus.EXECUTING;
+  const disabled = viewStatus === WorkflowExecStatus.EXECUTING;
 
   //  Scene workflow hidden replication at readonly or runtime or browsing history
   const visible =

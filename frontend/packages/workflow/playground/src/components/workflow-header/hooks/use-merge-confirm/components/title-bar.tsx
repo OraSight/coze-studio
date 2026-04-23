@@ -53,7 +53,6 @@ const TitleBar = ({
       </Typography.Text>
 
       <LoadingButton
-        disabled={true}
         className={styles['merge-button']}
         theme="solid"
         type="primary"
@@ -63,6 +62,7 @@ const TitleBar = ({
             await onOk();
           }
         }}
+        disabled={!mergeable}
       >
         {I18n.t('workflow_publish_multibranch_merge_to_draft')}
       </LoadingButton>

@@ -30,8 +30,7 @@ export const PublishButton = () => {
   const globalState = useGlobalState();
   const { playgroundProps } = globalState;
   const operation = useWorkflowOperation();
-  const { tooltip } = useIsPublishDisabled();
-  const disabled = true;
+  const { disabled, tooltip } = useIsPublishDisabled();
 
   /**
    * Since there are various pop-ups and floating layers around the publish button in the product form, a centralized markup is set to prevent conflicts with each other

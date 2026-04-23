@@ -85,7 +85,6 @@ export const useCreateKnowledgeModalV2 = (
           {I18n.t('cancel')}
         </Button>
         <LoadingButton
-          disabled={true}
           color="primary"
           onClick={async () => {
             beforeCreate?.(false);
@@ -100,7 +99,6 @@ export const useCreateKnowledgeModalV2 = (
           {I18n.t('kl_write_108')}
         </LoadingButton>
         <LoadingButton
-          disabled={true}
           data-testid={KnowledgeE2e.CreateKnowledgeModalSubmitAndImportButton}
           color="primary"
           onClick={async () => {

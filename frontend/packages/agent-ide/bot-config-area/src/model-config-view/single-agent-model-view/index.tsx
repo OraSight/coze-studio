@@ -89,7 +89,7 @@ export function SingleAgentModelView(props: SingleAgentModelViewProps) {
     <>
       <ModelSelect
         popoverClassName="h-auto !max-h-[70vh]"
-        disabled={true}
+        disabled={isReadonly}
         enableJumpDetail={
           scene === BotCreatorScene.Bot && spaceId && !IS_OPEN_SOURCE
             ? { spaceId }

@@ -72,7 +72,7 @@ export const KnowledgeIDENavBar = ({
   onBack,
 }: KnowledgeIDENavBarProps) => {
   const dataSetDetail = useKnowledgeStore(state => state.dataSetDetail);
-  const canEdit = false; // useKnowledgeStore(state => state.canEdit);
+  const canEdit = useKnowledgeStore(state => state.canEdit);
   const documentList = useKnowledgeStore(state => state.documentList);
   const navigate = useNavigate();
   const params = useKnowledgeParams();
@@ -250,6 +250,7 @@ export const KnowledgeIDENavBar = ({
           {isImageFormat ? <PhotoFilter /> : null}
           {isShowResegmentBtn ? textConfigButton : null}
           {showTableConfigButton ? tableConfigButton : null}
+          {canEdit ? importKnowledgeSourceButton : null}
         </Space>
       </div>
       {editKnowledgeModal}

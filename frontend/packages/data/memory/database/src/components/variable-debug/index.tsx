@@ -309,7 +309,6 @@ export const VariableDebug = () => {
         >
           <UIButton
             type="tertiary"
-            disabled={true}
             onClick={() => {
               sendTeaEvent(EVENT_NAMES.memory_click_front, {
                 bot_id: botId,

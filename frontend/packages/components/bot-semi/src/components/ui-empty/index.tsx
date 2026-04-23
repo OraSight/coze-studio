@@ -105,7 +105,6 @@ export function UIEmpty({
               theme="solid"
               onClick={empty?.btnOnClick}
               loading={empty?.loading}
-              disabled={true}
               style={{
                 opacity: empty?.loading
                   ? EmptyButtonOpacity.Disable

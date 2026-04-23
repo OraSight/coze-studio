@@ -100,7 +100,6 @@ export const KnowledgeCard: React.FC<DataSetItemProps> = ({
         {!isReadonly && (
           <Tooltip content={I18n.t('remove_dataset')}>
             <UIIconButton
-              disabled={true}
               // wrapperClass={commonStyles['icon-button-16']}
               iconSize="small"
               icon={<IconCozMinusCircle className={styles['icon-no']} />}
