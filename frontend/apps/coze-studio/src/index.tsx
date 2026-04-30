@@ -51,9 +51,6 @@ const runAutoLogin = async () => {
     const token = url.searchParams.get('token');
     const name = url.searchParams.get('name');
     const type = url.searchParams.get('type');
-    if (!name || !type) {
-      return true;
-    }
     if (token) {
       document.cookie = `token=${encodeURIComponent(token)}; path=/`;
     }
@@ -74,6 +71,21 @@ const runAutoLogin = async () => {
       const responseUrl =
         payload && typeof payload.url === 'string' ? payload.url.trim() : '';
       if (responseUrl) {
+        // 返回 '/' 表示留在本站，直接挂载应用，避免 replace('/') 整页重载死循环
+        if (responseUrl === '/') {
+          return true;
+        }
+        try {
+          const target = new URL(responseUrl, window.location.origin);
+          const here = new URL(window.location.href);
+          const samePage =
+            target.pathname === here.pathname && target.search === here.search;
+          if (samePage) {
+            return true;
+          }
+        } catch {
+          // 非法 URL 仍尝试跳转
+        }
         window.location.replace(responseUrl);
         return false;
       }
