@@ -26,16 +26,21 @@ import (
 	"github.com/coze-dev/coze-studio/backend/types/consts"
 )
 
+const fallbackForwardedPort = "30188"
+
 func getForwardedHost(ctx *app.RequestContext) string {
 	host := strings.TrimSpace(string(ctx.GetHeader("X-Forwarded-Host")))
 	if host == "" {
-		return string(ctx.Host())
+		host = string(ctx.Host())
 	}
 
 	host = strings.TrimSpace(strings.Split(host, ",")[0])
 	port := strings.TrimSpace(string(ctx.GetHeader("X-Forwarded-Port")))
-	if port == "" || strings.Contains(host, ":") {
+	if strings.Contains(host, ":") {
 		return host
+	}
+	if port == "" {
+		port = fallbackForwardedPort
 	}
 
 	return host + ":" + port
