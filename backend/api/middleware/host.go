@@ -18,6 +18,7 @@ package middleware
 
 import (
 	"context"
+	"strings"
 
 	"github.com/cloudwego/hertz/pkg/app"
 
@@ -25,9 +26,24 @@ import (
 	"github.com/coze-dev/coze-studio/backend/types/consts"
 )
 
+func getForwardedHost(ctx *app.RequestContext) string {
+	host := strings.TrimSpace(string(ctx.GetHeader("X-Forwarded-Host")))
+	if host == "" {
+		return string(ctx.Host())
+	}
+
+	host = strings.TrimSpace(strings.Split(host, ",")[0])
+	port := strings.TrimSpace(string(ctx.GetHeader("X-Forwarded-Port")))
+	if port == "" || strings.Contains(host, ":") {
+		return host
+	}
+
+	return host + ":" + port
+}
+
 func SetHostMW() app.HandlerFunc {
 	return func(c context.Context, ctx *app.RequestContext) {
-		ctxcache.Store(c, consts.HostKeyInCtx, string(ctx.Host()))
+		ctxcache.Store(c, consts.HostKeyInCtx, getForwardedHost(ctx))
 		ctxcache.Store(c, consts.RequestSchemeKeyInCtx, string(ctx.GetRequest().Scheme()))
 		ctx.Next(c)
 	}
