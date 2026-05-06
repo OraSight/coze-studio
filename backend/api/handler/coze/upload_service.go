@@ -27,7 +27,9 @@ import (
 	upload "github.com/coze-dev/coze-studio/backend/api/model/file/upload"
 	uploadSVC "github.com/coze-dev/coze-studio/backend/application/upload"
 
+	"github.com/coze-dev/coze-studio/backend/pkg/ctxcache"
 	"github.com/coze-dev/coze-studio/backend/pkg/lang/ptr"
+	appconsts "github.com/coze-dev/coze-studio/backend/types/consts"
 )
 
 // CommonUpload .
@@ -61,15 +63,18 @@ func ApplyUploadAction(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	resp := new(upload.ApplyUploadActionResponse)
-	host := c.Request.Host()
+	host, ok := ctxcache.Get[string](ctx, appconsts.HostKeyInCtx)
+	if !ok || host == "" {
+		host = string(c.Request.Host())
+	}
 	if ptr.From(req.Action) == "ApplyImageUpload" {
-		resp, err = uploadSVC.SVC.ApplyImageUpload(ctx, &req, string(host))
+		resp, err = uploadSVC.SVC.ApplyImageUpload(ctx, &req, host)
 		if err != nil {
 			internalServerErrorResponse(ctx, c, err)
 			return
 		}
 	} else if ptr.From(req.Action) == "CommitImageUpload" {
-		resp, err = uploadSVC.SVC.CommitImageUpload(ctx, &req, string(host))
+		resp, err = uploadSVC.SVC.CommitImageUpload(ctx, &req, host)
 		if err != nil {
 			internalServerErrorResponse(ctx, c, err)
 			return
