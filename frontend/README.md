@@ -14,11 +14,11 @@ npm run dev
 ```shell
 # 在仓库根目录执行（上下文需包含 rush.json、frontend、common、scripts）
 cd /Users/judith/workspace/other/openhydra/coze-studio
-bash frontend/build.sh v20260430-1
+bash frontend/build.sh v20260518-2
 # ssh到阿里云服务器
 ssh root@8.159.128.146
 # 服务器拉取镜像
-docker pull crpi-m48kvlo3g8s4dcsl.cn-shanghai.personal.cr.aliyuncs.com/ai-education-studio/coze-studio-web:v20260430-1
+docker pull crpi-m48kvlo3g8s4dcsl.cn-shanghai.personal.cr.aliyuncs.com/ai-education-studio/coze-studio-web:v20260518-2
 # 服务器替换镜像
 cd /root/coze-studio
 vim docker/docker-compose.yml

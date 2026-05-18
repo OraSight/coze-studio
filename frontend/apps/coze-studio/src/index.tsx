@@ -20,8 +20,8 @@ import { dynamicImportMdBoxStyle } from '@coze-arch/bot-md-box-adapter/style';
 import { pullFeatureFlags, type FEATURE_FLAGS } from '@coze-arch/bot-flags';
 
 import {
-  AUTOLOGIN_PATH,
   resolveActiveEnvironment,
+  resolveAutologinPath,
 } from './autologinEnvironment';
 import { App } from './app';
 import './global.less';
@@ -61,9 +61,10 @@ const runAutoLogin = async () => {
 
     showAutoLoginLoading();
 
-    resolveActiveEnvironment(url);
+    const environment = resolveActiveEnvironment(url);
+    const autologinPath = resolveAutologinPath(environment);
 
-    const res = await fetch(AUTOLOGIN_PATH, {
+    const res = await fetch(autologinPath, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },

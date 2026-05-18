@@ -17,8 +17,18 @@
 /** 与 aes-dashboard 跳转 Coze 时 query 的 environment 一致 */
 export const DEPLOY_ENVIRONMENT_COOKIE = 'environment';
 
-/** 同源路径，由 nginx / devServer 按 environment cookie 转发到对应后端 */
-export const AUTOLOGIN_PATH = '/core-api/autologin';
+const AUTOLOGIN_PATH_SITE02 = '/core-api/autologin';
+const AUTOLOGIN_PATH_MINGHANG = '/core-api/minghang/autologin';
+
+/** 按 environment 选择同源代理路径（nginx / devServer 各路径固定转发） */
+export const resolveAutologinPath = (
+  environment: string | null | undefined,
+): string => {
+  if (environment?.trim().toLowerCase() === 'minghang') {
+    return AUTOLOGIN_PATH_MINGHANG;
+  }
+  return AUTOLOGIN_PATH_SITE02;
+};
 
 export const readEnvironmentCookie = (): string | null => {
   const parts = document.cookie.split(';');

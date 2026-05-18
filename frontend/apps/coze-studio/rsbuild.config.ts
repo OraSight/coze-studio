@@ -24,21 +24,6 @@ const API_PROXY_TARGET = 'http://agent.woo-edu.com:30188/';
 const AUTOLOGIN_SITE02 = 'https://site02.openhydra.net:30002';
 const AUTOLOGIN_MINGHANG = 'https://mh.woo-edu.com';
 
-const parseEnvironmentCookie = (cookieHeader?: string): string | null => {
-  if (!cookieHeader) {
-    return null;
-  }
-  for (const part of cookieHeader.split(';')) {
-    const trimmed = part.trim();
-    if (!trimmed.startsWith('environment=')) {
-      continue;
-    }
-    const value = trimmed.slice('environment='.length);
-    return value ? decodeURIComponent(value) : null;
-  }
-  return null;
-};
-
 const mergedConfig = defineConfig({
   server: {
     strictPort: true,
@@ -56,17 +41,17 @@ const mergedConfig = defineConfig({
         changeOrigin: true,
       },
       {
+        context: ['/core-api/minghang/autologin'],
+        target: AUTOLOGIN_MINGHANG,
+        pathRewrite: {
+          '^/core-api/minghang/autologin': '/coreApi/users/autologin',
+        },
+        secure: false,
+        changeOrigin: true,
+      },
+      {
         context: ['/core-api/autologin'],
         target: AUTOLOGIN_SITE02,
-        router(req) {
-          const env = parseEnvironmentCookie(
-            req.headers.cookie as string | undefined,
-          );
-          if (env?.toLowerCase() === 'minghang') {
-            return AUTOLOGIN_MINGHANG;
-          }
-          return AUTOLOGIN_SITE02;
-        },
         pathRewrite: {
           '^/core-api/autologin': '/coreApi/users/autologin',
         },
