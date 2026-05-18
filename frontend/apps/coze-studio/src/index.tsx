@@ -19,6 +19,10 @@ import { initI18nInstance } from '@coze-arch/i18n/raw';
 import { dynamicImportMdBoxStyle } from '@coze-arch/bot-md-box-adapter/style';
 import { pullFeatureFlags, type FEATURE_FLAGS } from '@coze-arch/bot-flags';
 
+import {
+  AUTOLOGIN_PATH,
+  resolveActiveEnvironment,
+} from './autologinEnvironment';
 import { App } from './app';
 import './global.less';
 import './index.less';
@@ -57,9 +61,12 @@ const runAutoLogin = async () => {
 
     showAutoLoginLoading();
 
-    const res = await fetch('/core-api/autologin', {
+    resolveActiveEnvironment(url);
+
+    const res = await fetch(AUTOLOGIN_PATH, {
       method: 'POST',
       credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ res_name: name, res_type: type }),
     });
 
