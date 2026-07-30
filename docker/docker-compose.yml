@@ -386,7 +386,7 @@ services:
     # build:
     #   context: ../
     #   dockerfile: backend/Dockerfile
-    image: crpi-m48kvlo3g8s4dcsl.cn-shanghai.personal.cr.aliyuncs.com/ai-education-studio/coze-studio-server:hjaliyun20260410-1
+    image: coze-backend:latest
     restart: always
     container_name: coze-server
     env_file: *env_file
@@ -418,7 +418,7 @@ services:
     # build:
     #   context: ..
     #   dockerfile: frontend/Dockerfile
-    image: cozedev/coze-studio-web:latest
+    image: crpi-m48kvlo3g8s4dcsl.cn-shanghai.personal.cr.aliyuncs.com/ai-education-studio/coze-studio-web:v20260518-2
     container_name: coze-web
     restart: always
     ports:
@@ -437,7 +437,7 @@ services:
     # build:
     #   context: ..
     #   dockerfile: frontend/Dockerfile
-    image: crpi-m48kvlo3g8s4dcsl.cn-shanghai.personal.cr.aliyuncs.com/ai-education-studio/coze-studio-web:hjaliyun20260415-1
+    image: crpi-m48kvlo3g8s4dcsl.cn-shanghai.personal.cr.aliyuncs.com/ai-education-studio/coze-studio-web:v20260430-1
     container_name: coze-web-view
     restart: always
     ports:
